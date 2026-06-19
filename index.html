@@ -50,7 +50,7 @@
   .nav-cta:hover{background:var(--pink-dark);transform:translateY(-1px)}
 
   /* ── HERO ── */
-  .hero{position:relative;overflow:hidden;padding:74px 0 56px;text-align:center}
+  .hero{position:relative;overflow:hidden;padding:104px 0 92px;text-align:center}
   .hero::before{content:"";position:absolute;inset:0;z-index:-1;
     background:
       radial-gradient(58% 80% at 50% -12%,rgba(255,39,120,.18),transparent 60%),
@@ -97,7 +97,7 @@
 
   .tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
   .tool{flex:1;min-width:120px;text-align:center;background:var(--white);border:1px solid var(--pink-line);
-    border-radius:14px;padding:16px 10px;transition:.18s}
+    border-radius:14px;padding:16px 10px;transition:.18s;text-decoration:none;color:inherit;display:block}
   .tool:hover{border-color:var(--pink);transform:translateY(-2px)}
   .tool .e{font-size:22px}
   .tool .n{font-weight:800;font-size:14px;margin-top:6px}
@@ -184,7 +184,58 @@
   .chat-input button:hover{background:var(--pink-dark)}
   .chat-input button svg{width:20px;height:20px;fill:#fff}
 
+  /* ── PHOTO MARQUEE ── */
+  .marquee{padding:8px 0 4px;overflow:hidden}
+  .mq-row{display:flex;gap:16px;width:max-content;animation:mq-left 46s linear infinite}
+  .mq-row.rev{animation:mq-right 46s linear infinite;margin-top:16px}
+  .mq-row:hover{animation-play-state:paused}
+  .mq-row img{height:188px;width:auto;border-radius:16px;object-fit:cover;box-shadow:var(--shadow-sm);
+    border:1px solid var(--pink-line)}
+  @keyframes mq-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @keyframes mq-right{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+  .mq-cap{text-align:center;color:var(--ink-soft);font-size:13px;font-weight:600;margin-top:14px}
+
+  /* ── PRIZES ── */
+  .prize-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:6px}
+  .prize{background:var(--white);border:1px solid var(--pink-line);border-radius:16px;padding:20px 14px;
+    text-align:center;box-shadow:var(--shadow-sm)}
+  .prize .e{font-size:30px}
+  .prize .n{font-weight:800;font-size:15px;margin-top:8px;letter-spacing:-.02em}
+  .prize .d{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+  .prize-note{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-top:18px}
+  .pill{background:var(--pink-soft);color:var(--pink-dark);font-weight:700;font-size:13px;
+    padding:9px 16px;border-radius:999px}
+
+  /* ── HALL OF FAME / DOWNLOAD ── */
+  .hof-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+  .hof-cta .btn{font-size:15px}
+
+  /* ── MODAL ── */
+  .modal{position:fixed;inset:0;z-index:120;background:rgba(30,22,34,.55);display:none;
+    align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+  .modal.open{display:flex;animation:pop .22s ease}
+  .modal-card{background:#fff;border-radius:22px;max-width:760px;width:100%;box-shadow:0 40px 90px -30px rgba(255,39,120,.6);overflow:hidden}
+  .modal-head{position:sticky;top:0;background:linear-gradient(135deg,var(--pink),var(--pink-dark));color:#fff;
+    padding:20px 24px;display:flex;align-items:center;gap:10px}
+  .modal-head .t{font-weight:800;font-size:18px;letter-spacing:-.02em}
+  .modal-head .x{margin-left:auto;background:none;border:none;color:#fff;font-size:26px;cursor:pointer;line-height:1}
+  .modal-body{padding:18px 22px 26px}
+  .hof-group{font-weight:800;font-size:14px;color:var(--pink-dark);margin:18px 0 10px}
+  .hof-group:first-child{margin-top:4px}
+  .hof-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--pink-line);
+    border-radius:14px;margin-bottom:9px;transition:.15s}
+  .hof-item:hover{border-color:var(--pink);background:var(--pink-soft)}
+  .hof-item .meta{flex:1;min-width:0}
+  .hof-item .nm{font-weight:800;font-size:14.5px}
+  .hof-item .sc{font-size:12.5px;color:var(--ink-soft)}
+  .hof-item .pz{font-size:12px;font-weight:700;color:var(--pink-dark);background:var(--pink-soft);
+    padding:5px 10px;border-radius:999px;white-space:nowrap}
+  .hof-item:hover .pz{background:#fff}
+  .hof-item .go{font-size:13px;font-weight:700;color:var(--pink);text-decoration:none;white-space:nowrap}
+
   @media(max-width:680px){
+    .prize-grid{grid-template-columns:1fr 1fr}
+    .mq-row img{height:140px}
     .cards,.grid2,.seg{grid-template-columns:1fr}
     .strip{grid-template-columns:1fr;max-width:320px}
     .strip>div{border-right:none;border-bottom:1px solid var(--pink-line)}
@@ -203,7 +254,7 @@
 <!-- HEADER -->
 <header>
   <div class="wrap nav">
-    <div class="brand">투닝 콘텐츠 접수</div>
+    <div class="brand"><img src="image/logo-cne.jpg" alt="충청남도교육청">투닝 콘텐츠 접수</div>
     <a href="#apply" class="nav-cta">작품 접수하기 →</a>
   </div>
 </header>
@@ -211,6 +262,7 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
+    <img class="hero-logo" src="image/logo-cne.jpg" alt="충청남도교육청">
     <div><span class="badge"><span class="dot"></span>충청남도교육청 미래인재과 <span style="opacity:.45;font-weight:500;margin:0 2px">×</span> 투닝</span></div>
     <h1>제5회 AI 로봇 끝장 개발 한마당<br><span class="hl">주제2</span> 디지털 콘텐츠 창작</h1>
     <p class="sub">AI 도구 <strong>투닝</strong>으로 웹툰 또는 웹소설을 만들어 출품하세요.<br>비대면 온라인 참여 · 1인 1작품</p>
@@ -221,15 +273,27 @@
     <div class="strip">
       <div><div class="k">접수 기간</div><div class="v">7. 2 ~ 8. 17<small>09:00 ~ 17:00 마감</small></div></div>
       <div><div class="k">심사 · 선정</div><div class="v">8. 18 ~ 8. 31<small>외부 전문가 심사</small></div></div>
-      <div><div class="k">결과 발표</div><div class="v">9. 3 (당일)<small>한마당 현장</small></div></div>
+      <div><div class="k">결과 발표</div><div class="v">9. 3<small>온라인 발표</small></div></div>
     </div>
   </div>
 </section>
 
+<!-- PHOTO MARQUEE (지난 대회 현장) -->
+<div class="marquee" aria-hidden="true">
+  <div class="mq-row">
+    <img src="image/126624_80966_3739.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/e0061eb80d70d.jpg" alt="">
+    <img src="image/126624_80966_3739.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/e0061eb80d70d.jpg" alt="">
+  </div>
+  <div class="mq-row rev">
+    <img src="image/e0061eb80d70d.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/126624_80966_3739.jpg" alt="">
+    <img src="image/e0061eb80d70d.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/126624_80966_3739.jpg" alt="">
+  </div>
+</div>
+<p class="mq-cap">지난 「AI 로봇 끝장 개발 한마당」 현장</p>
+
 <!-- GUIDE -->
 <section id="guide">
   <div class="wrap">
-    <div class="sec-tag">PARTICIPATION</div>
     <h2>참가 영역 — 2종 중 택 1</h2>
     <div class="cards">
       <div class="card">
@@ -247,23 +311,61 @@
     </div>
 
     <div style="margin-top:34px">
-      <div class="sec-tag">TOOLKIT</div>
       <h2>제작 도구 — 투닝 4종</h2>
       <div class="tools">
-        <div class="tool"><div class="e">🧑‍🎨</div><div class="n">투닝 캐릭터</div><div class="d">스토리작가</div></div>
-        <div class="tool"><div class="e">🖍️</div><div class="n">투닝 에디터</div><div class="d">웹툰 제작</div></div>
-        <div class="tool"><div class="e">✨</div><div class="n">투닝 매직</div><div class="d">이미지 생성</div></div>
-        <div class="tool"><div class="e">📋</div><div class="n">투닝 보드</div><div class="d">제출용 링크</div></div>
+        <a class="tool" href="https://tooning.io/character" target="_blank" rel="noopener"><div class="e">🧑‍🎨</div><div class="n">투닝 캐릭터</div><div class="d">스토리작가 · 웹소설</div></a>
+        <a class="tool" href="https://tooning.io/" target="_blank" rel="noopener"><div class="e">🖍️</div><div class="n">투닝 에디터</div><div class="d">웹툰 제작</div></a>
+        <a class="tool" href="https://tooning.io/magic" target="_blank" rel="noopener"><div class="e">✨</div><div class="n">투닝 매직</div><div class="d">이미지 생성</div></a>
+        <a class="tool" href="https://tooning.io/board" target="_blank" rel="noopener"><div class="e">📋</div><div class="n">투닝 보드</div><div class="d">제출용 링크</div></a>
       </div>
-      <p class="hint" style="margin-top:12px">완성한 작품은 <strong>반드시 투닝 보드로 옮긴 뒤, 보드 링크</strong>를 복사하여 아래 접수 폼에 제출합니다.</p>
+      <p class="hint" style="margin-top:12px"><strong>웹툰·웹소설 모두</strong> 투닝 도구로 제작합니다. 특히 <strong>웹소설</strong>은 「투닝 캐릭터(스토리작가)」로 기획·집필하면 편리해요. 완성 후 작품을 <strong>투닝 보드</strong>로 옮기고, 보드 <strong>링크를 복사</strong>해 아래 접수 폼에 제출합니다. (도구별 자세한 사용법은 <a href="#faq">자주 묻는 질문</a> 참고)</p>
     </div>
   </div>
 </section>
 
+<!-- AWARDS -->
+<section id="awards">
+  <div class="wrap">
+    <h2>시상 내역</h2>
+    <p class="hint" style="margin-top:-12px;margin-bottom:20px">참여자의 <strong>약 40%</strong>가 수상합니다. 부문·학교급별 우수 작품을 선정해 아래 상품을 드립니다.</p>
+    <div class="prize-grid">
+      <div class="prize"><div class="e">⌚</div><div class="n">갤럭시 워치</div><div class="d">최우수작</div></div>
+      <div class="prize"><div class="e">🎧</div><div class="n">갤럭시 버즈</div><div class="d">우수작</div></div>
+      <div class="prize"><div class="e">🎁</div><div class="n">문화상품권 5만원</div><div class="d">장려작</div></div>
+      <div class="prize"><div class="e">✨</div><div class="n">투닝 Pro 1년권</div><div class="d">+ 10,000냥이 · 전 수상자</div></div>
+    </div>
+    <div class="prize-note">
+      <span class="pill">🏅 전 수상자에게 투닝 Pro 1년권 &amp; 10,000냥이 지급</span>
+      <span class="pill">🌏 국제 투닝 공모전 참여 시 가산점</span>
+    </div>
+
+    <div style="margin-top:40px">
+      <h2 style="margin-bottom:10px">명예의 전당</h2>
+      <p class="hint" style="margin-bottom:0">지난 대회 수상 작품을 예시작으로 만나보세요. 어떤 작품이 선정되었는지 직접 확인할 수 있어요.</p>
+      <div class="hof-cta">
+        <button class="btn btn-primary" id="hofBtn">🏆 지난 수상작 보기</button>
+        <a class="btn btn-ghost" href="https://tooning-contest.vercel.app/" target="_blank" rel="noopener">🌏 국제 투닝 공모전 바로가기 →</a>
+        <button class="btn btn-ghost" id="dlBtn">📄 대회 안내문 다운로드</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HALL OF FAME MODAL -->
+<div class="modal" id="hofModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <span style="font-size:22px">🏆</span>
+      <span class="t">명예의 전당 · 지난 대회 수상작</span>
+      <button class="x" id="hofClose" aria-label="닫기">×</button>
+    </div>
+    <div class="modal-body" id="hofList"></div>
+  </div>
+</div>
+
 <!-- APPLY -->
 <section id="apply">
   <div class="wrap">
-    <div class="sec-tag">SUBMIT</div>
     <h2>작품 접수</h2>
     <div class="form-card">
       <div class="ok-msg" id="okMsg">✅ 접수가 완료되었습니다! 신청 내역은 입력하신 이메일로 안내드립니다.</div>
@@ -312,8 +414,15 @@
 <!-- FAQ -->
 <section id="faq">
   <div class="wrap" style="max-width:760px">
-    <div class="sec-tag">FAQ</div>
     <h2>자주 묻는 질문</h2>
+    <details><summary>웹소설도 투닝 보드만 사용하나요? <span class="plus">+</span></summary>
+      <div class="ans">아니요. <strong>웹소설은 「투닝 캐릭터(스토리작가)」</strong>로 기획·집필하는 것을 권장합니다. 캐릭터를 설정하고 스토리를 작성한 뒤, 완성한 원고를 <strong>투닝 보드</strong>로 옮겨 정리하고 그 <strong>보드 링크</strong>를 접수 폼에 제출하면 됩니다. (투닝 보드는 <em>제출용 링크</em>를 만드는 도구입니다.)</div></details>
+    <details><summary>투닝 도구는 어디서 사용하나요? (서비스 링크) <span class="plus">+</span></summary>
+      <div class="ans">아래 도구로 작품을 제작하세요.<br>
+        · 투닝 캐릭터(스토리작가) — <a href="https://tooning.io/character" target="_blank" rel="noopener">tooning.io/character</a><br>
+        · 투닝 에디터(웹툰 제작) — <a href="https://tooning.io/" target="_blank" rel="noopener">tooning.io</a><br>
+        · 투닝 매직(이미지 생성) — <a href="https://tooning.io/magic" target="_blank" rel="noopener">tooning.io/magic</a><br>
+        · 투닝 보드(제출용 링크) — <a href="https://tooning.io/board" target="_blank" rel="noopener">tooning.io/board</a></div></details>
     <details><summary>유료 학생 계정은 언제부터 사용할 수 있나요? <span class="plus">+</span></summary>
       <div class="ans">7월 2일부터 8월 31일까지 유료 계정을 이용할 수 있으며, 해당 기간 이전과 이후에는 자동으로 무료 계정으로 전환됩니다.</div></details>
     <details><summary>작품을 잘못 제출했어요. 어떻게 하나요? <span class="plus">+</span></summary>
@@ -329,6 +438,7 @@
 
 <footer>
   <div class="wrap">
+    <img src="image/logo-cne.jpg" alt="충청남도교육청" style="width:46px;height:46px;border-radius:12px;object-fit:cover;margin-bottom:14px"><br>
     <strong>제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2</strong><br>
     주최 충청남도교육청 미래인재과 · 운영 투닝(툰스퀘어)<br>
     문의 <a href="mailto:support@tooning.io">support@tooning.io</a> · 050-7458-2020
@@ -477,7 +587,7 @@ var KB=[
   {k:['확인','접수됐','정상'],a:'신청작 확인을 도와드릴게요. <b>본인의 투닝 계정</b>을 알려주시면 접수 내역을 확인해 드립니다. 😊'},
   {k:['중복','두 개','둘 다','몇 개','1인'],a:'<b>1인 1작품</b>만 제출 가능합니다. 웹툰·웹소설 중 하나를 선택하며, 중복 제출이나 부문 변경 시 탈락 처리됩니다.'},
   {k:['도구','투닝 4','어떤 툴','프로그램','툴'],a:'<b>투닝 4종</b>을 사용합니다: 캐릭터(스토리작가) · 에디터 · 매직 · 보드. 작품 제출은 반드시 보드 링크로 진행합니다.'},
-  {k:['심사','발표','결과','수상','상'],a:'심사·선정은 <b>8월 18일~31일</b>, 결과 발표는 <b>9월 3일</b> 한마당 당일입니다. 참여자의 약 40%가 수상합니다.'},
+  {k:['심사','발표','결과','수상','상'],a:'심사·선정은 <b>8월 18일~31일</b>, 결과 발표는 <b>9월 3일 온라인</b>으로 안내됩니다. 참여자의 약 40%가 수상합니다.'},
   {k:['부상','선물','상품','경품'],a:'수상자에게는 갤럭시 워치/버즈, 문화상품권, 투닝 Pro 1년권 & 10,000냥이 등이 지급되며, 추후 국제 투닝 공모전 참여 시 가산점이 부여됩니다.'}
 ];
 function answer(q){
@@ -529,6 +639,70 @@ document.querySelectorAll('#chatQuick button').forEach(function(b){b.addEventLis
 function send(){var v=document.getElementById('chatInput').value.trim();if(!v)return;document.getElementById('chatInput').value='';ask(v)}
 document.getElementById('chatSend').addEventListener('click',send);
 document.getElementById('chatInput').addEventListener('keydown',function(e){if(e.key==='Enter')send()});
+
+/* ── 명예의 전당(지난 수상작) ── */
+var HOF=[
+  {g:'웹툰 · 초등',list:[
+    {n:'육태빈',s:'천안용암초등학교',pz:'갤럭시 워치',url:'https://tooning.io/board/join/1235844967'},
+    {n:'이연서',s:'아산용연초등학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/fmkibxbppn/4306664698'},
+    {n:'김예준',s:'천안가람초등학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/join/6495306309'},
+    {n:'김승주',s:'대홍초등학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/liwibgcgoc/2774798952'},
+    {n:'백지완',s:'천안용암초등학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/yubdelwbic/3351948035'}
+  ]},
+  {g:'웹툰 · 중등',list:[
+    {n:'조성현',s:'논산중학교',pz:'갤럭시 워치',url:'https://tooning.io/board/ikmbgdhvfn/8135479630'},
+    {n:'전태영',s:'논산대건중학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/xshaujeunh/5195834227'},
+    {n:'진하율',s:'논산중학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/rgmvpicthd/4095090303'},
+    {n:'김시후',s:'천안동중학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/vgqrmubrln/2712722515'}
+  ]},
+  {g:'웹툰 · 고등',list:[
+    {n:'송지홍',s:'논산대건고등학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/join/7914927529'},
+    {n:'이소윤',s:'서산중앙고등학교',pz:'갤럭시 워치',url:'https://tooning.io/board/mxqmdpzjgk/8309406714'}
+  ]},
+  {g:'웹소설 · 초등',list:[
+    {n:'이현성',s:'송학초등학교',pz:'갤럭시 워치',url:'https://tooning.io/board/fmajhsojhm/9489063810'},
+    {n:'임서나',s:'천안용암초등학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/svveywfogt/9442907898'},
+    {n:'도윤서',s:'천안봉명초등학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/wkglbvqink/0400705189'}
+  ]},
+  {g:'웹소설 · 중등',list:[
+    {n:'하수아',s:'동강중학교',pz:'갤럭시 워치',url:'https://tooning.io/board/sflobzaokk/9902342572'},
+    {n:'임원일',s:'논산중학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/yoihrzpqym/1377543970'}
+  ]},
+  {g:'웹소설 · 고등',list:[
+    {n:'김건범',s:'서산중앙고등학교',pz:'갤럭시 워치',url:'https://tooning.io/board/rcrvggziqr/6378593889'},
+    {n:'김수현',s:'설화고등학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/join/6879684241'}
+  ]}
+];
+(function(){
+  var html='';
+  HOF.forEach(function(grp){
+    html+='<div class="hof-group">'+grp.g+'</div>';
+    grp.list.forEach(function(it){
+      html+='<div class="hof-item">'+
+        '<div class="meta"><div class="nm">'+it.n+'</div><div class="sc">'+it.s+'</div></div>'+
+        '<span class="pz">'+it.pz+'</span>'+
+        '<a class="go" href="'+it.url+'" target="_blank" rel="noopener">작품 보기 →</a></div>';
+    });
+  });
+  document.getElementById('hofList').innerHTML=html;
+})();
+var hofModal=document.getElementById('hofModal');
+document.getElementById('hofBtn').addEventListener('click',function(){hofModal.classList.add('open')});
+document.getElementById('hofClose').addEventListener('click',function(){hofModal.classList.remove('open')});
+hofModal.addEventListener('click',function(e){if(e.target===hofModal)hofModal.classList.remove('open')});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')hofModal.classList.remove('open')});
+
+/* ── 대회 안내문 다운로드 ── */
+document.getElementById('dlBtn').addEventListener('click',function(){
+  /* 안내문 PDF가 준비되면 아래 경로에 파일을 두고 링크가 자동 동작합니다. */
+  var FILE='assets/대회안내문.pdf';
+  fetch(FILE,{method:'HEAD'}).then(function(r){
+    if(r.ok){var a=document.createElement('a');a.href=FILE;a.download='';document.body.appendChild(a);a.click();a.remove();}
+    else throw 0;
+  }).catch(function(){
+    alert('대회 안내문은 준비되는 대로 업로드될 예정입니다.\n급하신 경우 support@tooning.io로 문의해 주세요.');
+  });
+});
 </script>
 </body>
 </html>
