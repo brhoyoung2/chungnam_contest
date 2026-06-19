@@ -144,6 +144,13 @@
   .agree input{width:auto;margin-top:3px}
   .ok-msg{display:none;background:#EAF8F1;border:1px solid #BBE8D2;color:#0F7A50;border-radius:12px;
     padding:14px 16px;font-size:14px;font-weight:600;margin-bottom:18px}
+  .key-box{margin:14px 0 4px;background:#fff;border:2px dashed var(--pink);border-radius:14px;padding:16px;
+    text-align:center;font-weight:800;font-size:clamp(22px,5vw,28px);letter-spacing:.06em;color:var(--pink-dark);user-select:all}
+  .key-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .key-actions button{flex:1;min-width:140px;font-family:inherit;font-weight:700;font-size:14px;border-radius:10px;
+    padding:11px;cursor:pointer;border:1.5px solid var(--pink-line);background:#fff;color:var(--ink);transition:.15s}
+  .key-actions button:hover{border-color:var(--pink);color:var(--pink)}
+  .key-warn{font-size:12.5px;color:var(--ink-soft);font-weight:500;margin-top:10px}
   .btn-spin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.45);
     border-top-color:#fff;animation:spin .7s linear infinite;display:none}
 
@@ -446,7 +453,7 @@
         <div class="field">
           <label>생성형 AI 활용 과정 <span class="req">*</span></label>
           <textarea id="n_ai" placeholder="투닝(스토리작가·매직 등) AI를 어떻게 활용했는지 적어주세요."></textarea>
-          <p class="hint" style="margin-bottom:8px">활용 과정을 보여주는 이미지(캡처 등)를 첨부할 수 있어요. (여러 장 가능)</p>
+          <p class="hint" style="margin-bottom:8px">활용 과정을 보여주는 이미지(캡처 등)를 첨부할 수 있어요. <strong>(선택 · 여러 장 가능)</strong></p>
           <input type="file" id="n_ai_imgs" accept="image/*" multiple>
         </div>
         <div class="field">
@@ -467,7 +474,7 @@
 
 <!-- FAQ -->
 <section id="faq">
-  <div class="wrap" style="max-width:760px">
+  <div class="wrap">
     <h2>자주 묻는 질문</h2>
     <details><summary>웹소설도 투닝 보드만 사용하나요? <span class="plus">+</span></summary>
       <div class="ans">아니요. <strong>웹소설은 「투닝 캐릭터(스토리작가)」</strong>로 기획·집필하는 것을 권장합니다. 캐릭터를 설정하고 스토리를 작성한 뒤, 완성한 원고를 <strong>투닝 보드</strong>로 옮겨 정리하고 그 <strong>보드 링크</strong>를 접수 폼에 제출하면 됩니다. (투닝 보드는 <em>제출용 링크</em>를 만드는 도구입니다.)</div></details>
@@ -563,7 +570,7 @@ function addEpisode(){
   ep.querySelector('.ep-del').addEventListener('click',function(){ep.remove();renderEpNums()});
   epWrap.appendChild(ep);renderEpNums();
 }
-for(var _i=0;_i<3;_i++)addEpisode();
+addEpisode(); /* 1화만 기본 제공 — 2·3화는 '회차 추가'로 */
 document.getElementById('addEp').addEventListener('click',addEpisode);
 
 /* ── 파일 업로드 헬퍼 (Supabase Storage: submissions 버킷) ── */
@@ -575,6 +582,45 @@ function uploadFile(file,folder,acctSafe){
     if(r.error) throw r.error;
     return sb.storage.from('submissions').getPublicUrl(key).data.publicUrl;
   });
+}
+
+/* ── 접수 키 이미지 생성 (저장/공유) ── */
+function roundRectFill(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();ctx.fill();
+}
+function keyImage(key,mode){
+  var W=1000,H=560,c=document.createElement('canvas');c.width=W;c.height=H;
+  var x=c.getContext('2d');
+  x.fillStyle='#FFFBFD';x.fillRect(0,0,W,H);
+  x.fillStyle='#FF2778';x.fillRect(0,0,W,14);
+  x.textAlign='center';
+  x.fillStyle='#1E1622';x.font="700 34px Pretendard, sans-serif";
+  x.fillText('제5회 AI 로봇 끝장 개발 한마당 · 주제2',W/2,112);
+  x.fillStyle='#6B6270';x.font="400 22px Pretendard, sans-serif";
+  x.fillText('작품 접수 키 · 수정 / 접수 확인 시 필요',W/2,158);
+  x.fillStyle='#FFEDF3';roundRectFill(x,W/2-360,206,720,150,24);
+  x.fillStyle='#D6135C';x.font="800 60px Pretendard, sans-serif";
+  x.fillText(key,W/2,302);
+  x.fillStyle='#6B6270';x.font="400 20px Pretendard, sans-serif";
+  x.fillText('이 키를 캡처/저장해 안전하게 보관하세요.',W/2,432);
+  x.fillStyle='#FF2778';x.font="700 20px Pretendard, sans-serif";
+  x.fillText('chungnam-contest-q5ab.vercel.app',W/2,472);
+  c.toBlob(function(blob){
+    var fname='접수키_'+key+'.png';
+    if(mode==='share' && navigator.canShare){
+      try{
+        var file=new File([blob],fname,{type:'image/png'});
+        if(navigator.canShare({files:[file]})){
+          navigator.share({files:[file],title:'작품 접수 키',text:'작품 접수 키: '+key}).catch(function(){});
+          return;
+        }
+      }catch(e){}
+    }
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;
+    document.body.appendChild(a);a.click();setTimeout(function(){a.remove();URL.revokeObjectURL(a.href)},1000);
+    if(mode==='share') alert('이 기기는 이미지 직접 공유를 지원하지 않아, 키 이미지를 저장했어요.\n저장된 이미지를 공유해 주세요.');
+  },'image/png');
 }
 
 /* ── 접수 폼 (제출 스피너 포함) ── */
@@ -629,12 +675,23 @@ document.getElementById('submitBtn').addEventListener('click',function(){
     document.getElementById('btnTxt').textContent=on?(txt||'제출 중…'):'작품 제출하기';
     btn.disabled=on;btn.style.opacity=on?.85:1;
   }
-  function done(html){
+  function done(head,key){
     document.getElementById('btnSpin').style.display='none';
     document.getElementById('btnTxt').textContent='접수 완료 ✓';
     btn.disabled=true;btn.style.opacity=.6;
+    var html=head+'<br>아래 <b>접수 키</b>를 꼭 저장해 주세요. <b>작품 수정·접수 확인</b> 시 필요합니다.';
+    if(key){
+      html+='<div class="key-box">'+key+'</div>'+
+        '<div class="key-actions"><button type="button" id="keySave">🖼️ 키 이미지 저장</button>'+
+        '<button type="button" id="keyShare">📤 키 이미지 공유</button></div>'+
+        '<div class="key-warn">※ 키를 잃어버려도 본인의 투닝 계정으로 조회할 수 있어요(우측 하단 챗봇).</div>';
+    }
     okMsg.innerHTML=html;okMsg.style.display='block';
     okMsg.scrollIntoView({behavior:'smooth',block:'center'});
+    if(key){
+      document.getElementById('keySave').addEventListener('click',function(){keyImage(key,'save')});
+      document.getElementById('keyShare').addEventListener('click',function(){keyImage(key,'share')});
+    }
   }
   function fail(msg){busy(false);alert(msg);}
 
@@ -660,11 +717,11 @@ document.getElementById('submitBtn').addEventListener('click',function(){
     });
   }).then(function(res){
     if(res.error) throw res.error;
-    if(res.data==='updated'){
-      done('✅ 기존 접수 내역을 <strong>최신 작품으로 갱신</strong>했습니다! 안내는 입력하신 지도교사 이메일로 발송됩니다.');
-    }else{
-      done('✅ 접수가 완료되었습니다! 신청 내역은 입력하신 지도교사 이메일로 안내드립니다.');
-    }
+    var d=res.data||{};
+    var head=(d.status==='updated')
+      ? '✅ 기존 접수 내역을 <strong>최신 작품으로 갱신</strong>했습니다!'
+      : '✅ 접수가 완료되었습니다!';
+    done(head, d.key||'');
   }).catch(function(err){
     var msg=(err&&err.message)||'';
     if(msg.indexOf('category_locked')>-1){
@@ -715,7 +772,7 @@ var KB=[
   {k:['계정','유료','무료','사용 기간'],a:'유료 계정은 <b>7월 2일 ~ 8월 31일</b> 사용 가능하며, 이 기간 전후에는 자동으로 무료 계정으로 전환됩니다.'},
   {k:['오류','에러','안 돼','버그','고객센터'],a:'이용 중 오류는 투닝 고객센터로 문의해 주세요.<br>📧 support@tooning.io<br>📞 050-7458-2020'},
   {k:['잘못','다시','수정','변경','취소'],a:'올바른 작품으로 <b>다시 제출</b>하신 뒤, 저(투닝 접수 도우미)에게 <b>본인의 투닝 계정</b>과 <b>작품 링크</b>를 알려주세요. 확인 후 반영해 드리겠습니다. 😊'},
-  {k:['확인','접수됐','정상'],a:'신청작 확인을 도와드릴게요. <b>본인의 투닝 계정</b>을 알려주시면 접수 내역을 확인해 드립니다. 😊'},
+  {k:['확인','접수됐','정상','접수 키','접수키','키 확인'],a:'신청작 확인을 도와드릴게요. <b>접수 키(CNAI-…)</b> 또는 <b>본인의 투닝 계정</b>을 알려주시면 접수 내역을 확인해 드립니다. 😊'},
   {k:['중복','두 개','둘 다','몇 개','1인'],a:'<b>1인 1작품</b>만 제출 가능합니다. 웹툰·웹소설 중 하나를 선택하며, 중복 제출이나 부문 변경 시 탈락 처리됩니다.'},
   {k:['도구','투닝 4','어떤 툴','프로그램','툴'],a:'<b>투닝 4종</b>을 사용합니다: 캐릭터(스토리작가) · 에디터 · 매직 · 보드. 작품 제출은 반드시 보드 링크로 진행합니다.'},
   {k:['심사','발표','결과','수상','상'],a:'심사·선정은 <b>8월 18일~31일</b>, 결과 발표는 <b>9월 3일 온라인</b>으로 안내됩니다. 참여자의 약 40%가 수상합니다.'},
@@ -753,7 +810,8 @@ function lookupAccount(acct){
       append('「'+acct+'」 계정으로 <b>접수된 내역을 찾지 못했어요.</b> 😢<br>계정을 다시 확인하시거나, 아직 접수 전이라면 위 접수 폼에서 제출해 주세요.','bot');
     }else{
       var when=new Date(r.updated_at||r.created_at).toLocaleString('ko-KR');
-      append('✅ <b>접수 내역을 확인했어요!</b><br>· 이름: '+r.name+'<br>· 학교: '+r.school+' ('+r.grade+')<br>· 부문: <b>'+r.category+'</b><br>· 작품 링크: <a href="'+r.board_link+'" target="_blank">바로가기</a><br>· 최종 접수: '+when+'<br><br>수정이 필요하면 같은 계정으로 위 접수 폼에서 다시 제출하시면 됩니다. 😊','bot');
+      var keyLine=r.submit_key?'<br>· 접수 키: <b>'+r.submit_key+'</b>':'';
+      append('✅ <b>접수 내역을 확인했어요!</b><br>· 이름: '+r.name+'<br>· 학교: '+r.school+' ('+r.grade+')<br>· 부문: <b>'+r.category+'</b>'+keyLine+'<br>· 작품 링크: <a href="'+r.board_link+'" target="_blank">바로가기</a><br>· 최종 접수: '+when+'<br><br>수정이 필요하면 같은 계정으로 위 접수 폼에서 다시 제출하시면 됩니다. 😊','bot');
     }
   }).catch(function(){
     if(dots.parentNode)body.removeChild(dots);

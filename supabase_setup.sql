@@ -25,11 +25,16 @@ create table if not exists public."충남콘테스트_접수" (
   category        text    not null check (category in ('웹툰','웹소설')), -- 참가 부문
   board_link      text    not null,                                  -- 투닝 보드 링크
   agreed          boolean not null default false,                    -- 출품 요건 동의
-  extra           jsonb   not null default '{}'::jsonb               -- 부문별 추가 데이터(웹툰 PDF URL / 웹소설 본문·AI과정·이미지 등)
+  extra           jsonb   not null default '{}'::jsonb,              -- 부문별 추가 데이터(웹툰 PDF URL / 웹소설 본문·AI과정·이미지 등)
+  submit_key      text    unique                                     -- 접수 고유 키(수정·확인용, 예: CNAI-7K3Q-2M9X)
 );
 
 -- (기존 테이블에 컬럼 보강)
 alter table public."충남콘테스트_접수" add column if not exists extra jsonb not null default '{}'::jsonb;
+alter table public."충남콘테스트_접수" add column if not exists submit_key text;
+do $$ begin
+  alter table public."충남콘테스트_접수" add constraint "충남콘테스트_접수_submit_key_key" unique (submit_key);
+exception when duplicate_table or duplicate_object then null; end $$;
 
 -- 2) RLS: 켜되 anon 직접 접근 정책은 두지 않음(전부 차단) ---------
 alter table public."충남콘테스트_접수" enable row level security;
@@ -41,11 +46,12 @@ drop policy if exists "충남콘테스트_접수_anon_update" on public."충남�
 delete from public."충남콘테스트_접수" where tooning_account = '__claude_test__@tooning.io';
 
 -- 3) 접수 함수 (INSERT or UPDATE) ------------------------------
---    반환: 'created'(신규) | 'updated'(갱신)
+--    반환(jsonb): { "status":"created"|"updated", "key":"CNAI-XXXX-XXXX" }
 --    부문 변경 시 예외 'category_locked:<기존부문>' 발생 → 클라이언트가 안내.
 --    p_extra: 부문별 추가 데이터(웹툰 pdf_url / 웹소설 description·ai_process·ai_images·episodes)
--- (이전 8-인자 버전 제거 후 9-인자 버전 생성)
+-- (이전 버전 제거 후 재생성)
 drop function if exists public."충남콘테스트_제출"(text,text,text,text,text,text,text,boolean);
+drop function if exists public."충남콘테스트_제출"(text,text,text,text,text,text,text,boolean,jsonb);
 create or replace function public."충남콘테스트_제출"(
   p_name          text,
   p_school        text,
@@ -57,7 +63,7 @@ create or replace function public."충남콘테스트_제출"(
   p_agreed        boolean,
   p_extra         jsonb default '{}'::jsonb
 )
-returns text
+returns jsonb
 language plpgsql
 security definer
 set search_path = public
@@ -66,6 +72,7 @@ declare
   v_acct  text  := lower(trim(p_account));
   v_extra jsonb := coalesce(p_extra, '{}'::jsonb);
   v_prev  record;
+  v_key   text;
 begin
   if coalesce(p_agreed,false) = false then
     raise exception 'agreement_required';
@@ -83,17 +90,25 @@ begin
     if v_prev.category <> p_category then
       raise exception 'category_locked:%', v_prev.category;   -- 부문 변경 차단
     end if;
+    v_key := v_prev.submit_key;
+    if v_key is null then                                     -- 레거시 행이면 키 발급
+      v_key := 'CNAI-'||upper(substr(md5(random()::text||clock_timestamp()::text),1,4))
+                     ||'-'||upper(substr(md5(random()::text||clock_timestamp()::text),1,4));
+    end if;
     update "충남콘테스트_접수"
        set name=p_name, school=p_school, grade=p_grade, teacher_email=p_teacher_email,
-           category=p_category, board_link=p_board_link, agreed=p_agreed, extra=v_extra, updated_at=now()
+           category=p_category, board_link=p_board_link, agreed=p_agreed, extra=v_extra,
+           submit_key=v_key, updated_at=now()
      where tooning_account = v_acct;
-    return 'updated';
+    return jsonb_build_object('status','updated','key',v_key);
   else
+    v_key := 'CNAI-'||upper(substr(md5(random()::text||clock_timestamp()::text),1,4))
+                   ||'-'||upper(substr(md5(random()::text||clock_timestamp()::text),1,4));
     insert into "충남콘테스트_접수"
-      (name, school, grade, teacher_email, tooning_account, category, board_link, agreed, extra)
+      (name, school, grade, teacher_email, tooning_account, category, board_link, agreed, extra, submit_key)
     values
-      (p_name, p_school, p_grade, p_teacher_email, v_acct, p_category, p_board_link, p_agreed, v_extra);
-    return 'created';
+      (p_name, p_school, p_grade, p_teacher_email, v_acct, p_category, p_board_link, p_agreed, v_extra, v_key);
+    return jsonb_build_object('status','created','key',v_key);
   end if;
 end;
 $$;
@@ -101,7 +116,7 @@ $$;
 grant execute on function
   public."충남콘테스트_제출"(text,text,text,text,text,text,text,boolean,jsonb) to anon;
 
--- 4) 조회 함수 (본인 계정 1건) --------------------------------
+-- 4) 조회 함수 (본인 계정 또는 접수 키로 1건) -------------------
 drop function if exists public."충남콘테스트_조회"(text);
 create or replace function public."충남콘테스트_조회"(p_account text)
 returns table (
@@ -110,6 +125,7 @@ returns table (
   grade       text,
   category    text,
   board_link  text,
+  submit_key  text,
   extra       jsonb,
   created_at  timestamptz,
   updated_at  timestamptz
@@ -118,9 +134,10 @@ language sql
 security definer
 set search_path = public
 as $$
-  select s.name, s.school, s.grade, s.category, s.board_link, s.extra, s.created_at, s.updated_at
+  select s.name, s.school, s.grade, s.category, s.board_link, s.submit_key, s.extra, s.created_at, s.updated_at
   from public."충남콘테스트_접수" s
   where s.tooning_account = lower(trim(p_account))
+     or upper(s.submit_key) = upper(trim(p_account))
   limit 1;
 $$;
 
