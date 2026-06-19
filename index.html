@@ -110,6 +110,8 @@
   .card:hover{transform:translateY(-3px);border-color:var(--pink)}
   .card .ico{width:42px;height:42px;border-radius:12px;background:var(--pink-soft);color:var(--pink);
     display:grid;place-items:center;font-size:20px;margin-bottom:14px}
+  .card .thumb{width:100%;height:220px;border-radius:16px;object-fit:cover;background:#fff;display:block;
+    margin-bottom:18px;border:1px solid var(--pink-line);box-shadow:var(--shadow-sm)}
   .card h3{font-size:17px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
   .card p{font-size:14px;color:var(--ink-soft)}
   .card .tags{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
@@ -244,10 +246,13 @@
 
   /* ── PRIZES ── */
   .prize-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:6px}
-  .prize{background:var(--white);border:1px solid var(--pink-line);border-radius:16px;padding:20px 14px;
-    text-align:center;box-shadow:var(--shadow-sm)}
+  .prize{background:var(--white);border:1px solid var(--pink-line);border-radius:18px;padding:18px 14px 18px;
+    text-align:center;box-shadow:var(--shadow-sm);transition:.2s}
+  .prize:hover{transform:translateY(-3px);border-color:var(--pink)}
+  .prize img{width:100%;height:150px;object-fit:contain;display:block;margin-bottom:10px;
+    background:#fff;border-radius:12px}
   .prize .e{font-size:30px}
-  .prize .n{font-weight:800;font-size:15px;margin-top:8px;letter-spacing:-.02em}
+  .prize .n{font-weight:800;font-size:15.5px;margin-top:4px;letter-spacing:-.02em}
   .prize .d{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
   .prize-note{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-top:18px}
   .pill{background:var(--pink-soft);color:var(--pink-dark);font-weight:700;font-size:13px;
@@ -353,13 +358,13 @@
     </div>
     <div class="cards">
       <div class="card">
-        <div class="ico">🎨</div>
+        <img class="thumb" src="image/webtoon.jpg" alt="웹툰" loading="lazy">
         <h3>웹툰</h3>
         <p>투닝을 활용해 표지를 포함한 한 편의 웹툰을 완성합니다.</p>
         <div class="tags"><span class="tag">총 10컷</span><span class="tag">표지 포함</span></div>
       </div>
       <div class="card">
-        <div class="ico">📖</div>
+        <img class="thumb" src="image/webnovel.jpg" alt="웹소설" loading="lazy">
         <h3>웹소설</h3>
         <p>투닝으로 기획·집필한 3화 분량의 웹소설을 출품합니다.</p>
         <div class="tags"><span class="tag">총 3화</span><span class="tag">4,500자 이상</span><span class="tag">화당 1,500자↑</span></div>
@@ -388,10 +393,10 @@
       <p class="lead">참여자의 <strong>약 40%</strong>가 수상합니다. 부문·학교급별 우수 작품을 선정해 아래 상품을 드립니다.</p>
     </div>
     <div class="prize-grid">
-      <div class="prize"><div class="e">⌚</div><div class="n">갤럭시 워치</div><div class="d">최우수작</div></div>
-      <div class="prize"><div class="e">🎧</div><div class="n">갤럭시 버즈</div><div class="d">우수작</div></div>
-      <div class="prize"><div class="e">🎁</div><div class="n">문화상품권 5만원</div><div class="d">장려작</div></div>
-      <div class="prize"><div class="e">✨</div><div class="n">투닝 Pro 1년권</div><div class="d">+ 10,000냥이 · 전 수상자</div></div>
+      <div class="prize"><img src="image/prize-watch.jpg" alt="갤럭시 워치" loading="lazy"><div class="n">갤럭시 워치</div><div class="d">최우수작</div></div>
+      <div class="prize"><img src="image/prize-buds.jpg" alt="갤럭시 버즈" loading="lazy"><div class="n">갤럭시 버즈</div><div class="d">우수작</div></div>
+      <div class="prize"><img src="image/prize-voucher.jpg" alt="문화상품권 5만원" loading="lazy"><div class="n">문화상품권 5만원</div><div class="d">장려작</div></div>
+      <div class="prize"><img src="image/prize-pro.jpg" alt="투닝 Pro 1년권" loading="lazy"><div class="n">투닝 Pro 1년권</div><div class="d">+ 10,000냥이 · 전 수상자</div></div>
     </div>
     <div class="prize-note">
       <span class="pill">🏅 전 수상자에게 투닝 Pro 1년권 &amp; 10,000냥이 지급</span>
