@@ -57,6 +57,12 @@
       radial-gradient(42% 60% at 86% 14%,rgba(255,39,120,.12),transparent 55%),
       radial-gradient(40% 55% at 12% 30%,rgba(255,39,120,.08),transparent 55%);}
   .hero-logo{width:74px;height:74px;border-radius:20px;object-fit:cover;box-shadow:var(--shadow);margin-bottom:22px}
+  .hero-orgs{display:inline-flex;align-items:center;gap:20px;background:var(--white);border:1px solid var(--pink-line);
+    border-radius:999px;padding:13px 30px;box-shadow:var(--shadow-sm)}
+  .hero-orgs img{display:block;width:auto}
+  .hero-orgs .org-cne{height:38px}
+  .hero-orgs .org-tn{height:26px}
+  .hero-orgs .org-x{color:var(--ink-soft);opacity:.4;font-weight:500;font-size:20px}
   .badge{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--pink-line);
     color:var(--pink-dark);font-weight:700;font-size:13px;padding:7px 15px;border-radius:999px;box-shadow:var(--shadow-sm)}
   .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(22,160,106,.18)}
@@ -212,9 +218,10 @@
 
   /* ── PHOTO MARQUEE ── */
   .marquee{padding:8px 0 4px;overflow:hidden}
-  .mq-row{display:flex;gap:16px;width:max-content;animation:mq-left 46s linear infinite}
-  .mq-row.rev{animation:mq-right 46s linear infinite;margin-top:16px}
+  .mq-row{display:flex;width:max-content;animation:mq-left 46s linear infinite}
+  .mq-row.rev{animation-name:mq-right;margin-top:16px}
   .mq-row:hover{animation-play-state:paused}
+  .mq-group{display:flex;gap:16px;padding-right:16px;flex-shrink:0}
   .mq-row img{height:188px;width:auto;border-radius:16px;object-fit:cover;box-shadow:var(--shadow-sm);
     border:1px solid var(--pink-line)}
   @keyframes mq-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -262,6 +269,10 @@
   @media(max-width:680px){
     .prize-grid{grid-template-columns:1fr 1fr}
     .mq-row img{height:140px}
+    .hero-orgs{gap:13px;padding:10px 20px}
+    .hero-orgs .org-cne{height:26px}
+    .hero-orgs .org-tn{height:18px}
+    .hero-orgs .org-x{font-size:16px}
     .cards,.grid2,.seg{grid-template-columns:1fr}
     .strip{grid-template-columns:1fr;max-width:320px}
     .strip>div{border-right:none;border-bottom:1px solid var(--pink-line)}
@@ -288,7 +299,7 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <div><span class="badge" style="padding:9px 18px"><img src="image/logo.png" alt="충청남도교육청 × 투닝" style="height:28px;width:auto;display:block"></span></div>
+    <div><span class="hero-orgs"><img class="org-cne" src="image/logo-cne.png" alt="충청남도교육청"><span class="org-x">×</span><img class="org-tn" src="image/logo-tooning.png" alt="투닝"></span></div>
     <h1>제5회 AI 로봇 끝장 개발 한마당<br><span class="hl">주제2</span> 디지털 콘텐츠 창작</h1>
     <p class="sub">AI 도구 <strong>투닝</strong>으로 웹툰 또는 웹소설을 만들어 출품하세요.<br>비대면 온라인 참여 · 1인 1작품</p>
     <div class="hero-btns">
@@ -306,12 +317,12 @@
 <!-- PHOTO MARQUEE (지난 대회 현장) -->
 <div class="marquee" aria-hidden="true">
   <div class="mq-row">
-    <img src="image/126624_80966_3739.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/e0061eb80d70d.jpg" alt="">
-    <img src="image/126624_80966_3739.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/e0061eb80d70d.jpg" alt="">
+    <div class="mq-group"><img src="image/126624_80966_3739.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/e0061eb80d70d.jpg" alt=""></div>
+    <div class="mq-group"><img src="image/126624_80966_3739.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/e0061eb80d70d.jpg" alt=""></div>
   </div>
   <div class="mq-row rev">
-    <img src="image/e0061eb80d70d.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/126624_80966_3739.jpg" alt="">
-    <img src="image/e0061eb80d70d.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/126624_80966_3739.jpg" alt="">
+    <div class="mq-group"><img src="image/e0061eb80d70d.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/126624_80966_3739.jpg" alt=""></div>
+    <div class="mq-group"><img src="image/e0061eb80d70d.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/126624_80966_3739.jpg" alt=""></div>
   </div>
 </div>
 <p class="mq-cap">지난 「AI 로봇 끝장 개발 한마당」 현장</p>
