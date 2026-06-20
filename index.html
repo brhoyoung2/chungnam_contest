@@ -562,7 +562,7 @@
 <footer>
   <div class="wrap">
     <strong>제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2</strong><br>
-    주관 충청남도교육청 미래인재과 · 공동참여 투닝<br>
+    주관 충청남도교육청 미래인재과 · <span id="adminGate">공동참여 투닝</span><br>
     문의 <a href="mailto:support@tooning.io">support@tooning.io</a> · 050-7458-2020
   </div>
 </footer>
@@ -886,6 +886,17 @@ function ask(q){
   if(acct) lookupAccount(acct);
   else botSay(answer(q));
 }
+
+/* ── 숨겨진 관리자 진입: '공동참여 투닝' 5회 클릭 ── */
+(function(){
+  var gate=document.getElementById('adminGate'); if(!gate)return;
+  var n=0,timer=null;
+  gate.addEventListener('click',function(){
+    n++; clearTimeout(timer);
+    if(n>=5){location.href='admin-index.html';return;}
+    timer=setTimeout(function(){n=0},1500);
+  });
+})();
 document.querySelectorAll('#chatQuick button').forEach(function(b){b.addEventListener('click',function(){ask(b.textContent)})});
 function send(){var v=document.getElementById('chatInput').value.trim();if(!v)return;document.getElementById('chatInput').value='';ask(v)}
 document.getElementById('chatSend').addEventListener('click',send);

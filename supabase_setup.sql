@@ -157,8 +157,47 @@ drop policy if exists "submissions_public_read" on storage.objects;
 create policy "submissions_public_read" on storage.objects
   for select to anon using (bucket_id = 'submissions');
 
+-- 6) 관리자 함수 (비밀번호 게이트) --------------------------------
+--    ⚠️ 운영 전 아래 비밀번호('cnedu-tooning-2026')를 반드시 변경하세요. (두 함수 동일하게)
+--    anon 키만으로는 전체 조회 불가 — 올바른 비밀번호일 때만 전체 목록/심사 저장 허용.
+
+-- 6-1) 전체 접수 목록 (개인정보·결과물 포함)
+create or replace function public."충남콘테스트_관리자목록"(p_pw text)
+returns setof public."충남콘테스트_접수"
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_pw is distinct from 'cnedu-tooning-2026' then
+    raise exception 'unauthorized';
+  end if;
+  return query select * from public."충남콘테스트_접수" order by created_at desc;
+end;
+$$;
+grant execute on function public."충남콘테스트_관리자목록"(text) to anon;
+
+-- 6-2) AI 심사 결과 저장 (extra.ai_review 에 기록)
+create or replace function public."충남콘테스트_관리자심사저장"(p_pw text, p_id uuid, p_review jsonb)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_pw is distinct from 'cnedu-tooning-2026' then
+    raise exception 'unauthorized';
+  end if;
+  update public."충남콘테스트_접수"
+     set extra = jsonb_set(coalesce(extra,'{}'::jsonb), '{ai_review}', p_review, true)
+   where id = p_id;
+end;
+$$;
+grant execute on function public."충남콘테스트_관리자심사저장"(text,uuid,jsonb) to anon;
+
 -- ============================================================
 --  동작 확인용:
 --  select public."충남콘테스트_제출"('홍길동','OO고','고 2학년','t@s.kr','me@tooning.io','웹툰','https://tooning.io/board/x',true,'{"type":"webtoon","pdf_url":"https://..."}'::jsonb);
 --  select * from public."충남콘테스트_조회"('me@tooning.io');
+--  select * from public."충남콘테스트_관리자목록"('cnedu-tooning-2026');
 -- ============================================================

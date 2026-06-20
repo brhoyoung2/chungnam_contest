@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>접수 관리자 · AI 심사</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+  :root{--pink:#FF2778;--pink-dark:#D6135C;--pink-soft:#FFEDF3;--pink-line:#FFD3E1;--ink:#1E1622;--ink-soft:#6B6270;
+    --bg:#F6F5F8;--white:#fff;--ok:#16A06A;--warn:#E5484D;--blue:#4766FF;--line:#E6E4EA;--radius:14px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Pretendard',sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;word-break:keep-all;-webkit-font-smoothing:antialiased}
+  a{color:var(--pink);font-weight:700;text-decoration:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 18px}
+  header{position:sticky;top:0;z-index:30;background:rgba(246,245,248,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;gap:12px;height:60px}
+  .nav .t{font-weight:800;font-size:16px}.nav .t b{color:var(--pink)}
+  .nav .sp{flex:1}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;
+    border:1px solid var(--pink-line);background:#fff;color:var(--ink);padding:9px 14px;border-radius:10px;transition:.15s}
+  .btn:hover{border-color:var(--pink);color:var(--pink)}
+  .btn-p{background:var(--pink);color:#fff;border-color:var(--pink)}.btn-p:hover{background:var(--pink-dark);color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  /* LOGIN */
+  .gate{max-width:420px;margin:9vh auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:34px 28px;box-shadow:0 20px 50px -28px rgba(0,0,0,.3)}
+  .gate h1{font-size:21px;letter-spacing:-.02em;margin-bottom:6px}
+  .gate p{font-size:13.5px;color:var(--ink-soft);margin-bottom:20px}
+  label{display:block;font-size:12.5px;font-weight:700;margin:14px 0 6px}
+  input{width:100%;font-family:inherit;font-size:15px;padding:11px 13px;border:1.5px solid var(--pink-line);border-radius:10px}
+  input:focus{outline:none;border-color:var(--pink);box-shadow:0 0 0 4px var(--pink-soft)}
+  .gate .btn-p{width:100%;justify-content:center;margin-top:18px;padding:13px}
+  .err{color:var(--warn);font-size:13px;font-weight:600;margin-top:12px;display:none}
+  /* TOOLBAR */
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 14px}
+  .bar .count{font-weight:800;font-size:15px}.bar .count b{color:var(--pink)}
+  .bar .sp{flex:1}
+  .bar input.search{width:230px;font-size:14px;padding:9px 12px}
+  .keychip{font-size:12px;font-weight:700;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#fff}
+  .keychip.on{color:var(--ok);border-color:#BBE8D2;background:#EAF8F1}
+  .keychip.off{color:var(--warn);border-color:#F3C6C8;background:#FDECEC}
+  /* CARD */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding-bottom:60px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px 14px;box-shadow:0 6px 18px -14px rgba(0,0,0,.25)}
+  .card .top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .nm{font-weight:800;font-size:16px}
+  .cat{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px}
+  .cat.wt{background:#FFEDF3;color:var(--pink-dark)}.cat.wn{background:#EAefff;color:var(--blue)}
+  .key{font-family:monospace;font-size:12px;font-weight:700;color:var(--ink-soft);margin-left:auto}
+  .rows{font-size:13px;color:var(--ink-soft);display:grid;gap:3px;margin-bottom:10px}
+  .rows b{color:var(--ink);font-weight:700}
+  .rows .pi{background:var(--pink-soft);border-radius:8px;padding:6px 9px;margin-top:4px}
+  .result{border-top:1px dashed var(--line);padding-top:10px;margin-top:4px}
+  .result .lab{font-size:11.5px;font-weight:800;color:var(--pink-dark);margin-bottom:5px;letter-spacing:.02em}
+  .ep{font-size:13px;background:#FAF9FB;border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin-top:6px;white-space:pre-wrap;max-height:120px;overflow:auto}
+  .files a{display:inline-block;font-size:12.5px;margin:4px 8px 0 0}
+  details>summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--pink);list-style:none;margin-top:6px}
+  details>summary::-webkit-details-marker{display:none}
+  /* AI REVIEW */
+  .judge{border-top:1px dashed var(--line);margin-top:12px;padding-top:11px}
+  .jhead{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .jhead .lab{font-size:11.5px;font-weight:800;color:#7A3BFF;letter-spacing:.02em}
+  .jhead .sp{flex:1}
+  .score{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+  .sc{font-size:12px;font-weight:700;background:#F3EFFF;color:#5B2BD6;padding:4px 9px;border-radius:8px}
+  .sc b{color:#7A3BFF}
+  .total{font-size:13px;font-weight:800}.total .v{color:#7A3BFF;font-size:16px}
+  .verdict{font-size:13px;margin-top:6px;background:#FAF9FB;border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+  .rec{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;margin-left:6px}
+  .rec.y{background:#EAF8F1;color:var(--ok)}.rec.n{background:#FDECEC;color:var(--warn)}
+  .spin{width:15px;height:15px;border:2px solid var(--pink-line);border-top-color:var(--pink);border-radius:50%;animation:s .7s linear infinite;display:inline-block}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .muted{color:var(--ink-soft);font-size:12.5px}
+  dialog{border:none;border-radius:16px;padding:0;max-width:440px;width:92%;box-shadow:0 30px 70px -20px rgba(0,0,0,.4)}
+  dialog::backdrop{background:rgba(30,22,34,.5)}
+  .dlg{padding:24px}
+  .dlg h3{font-size:17px;margin-bottom:6px}.dlg p{font-size:13px;color:var(--ink-soft);margin-bottom:14px}
+  .dlg .row{display:flex;gap:8px;margin-top:14px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div id="gate" class="gate">
+  <h1>접수 관리자 · <span style="color:var(--pink)">AI 심사</span></h1>
+  <p>관리자 비밀번호를 입력하세요. (접수 데이터는 비밀번호 인증 후에만 조회됩니다.)</p>
+  <label>관리자 비밀번호</label>
+  <input type="password" id="pw" placeholder="비밀번호" autocomplete="off">
+  <button class="btn btn-p" id="loginBtn">로그인</button>
+  <div class="err" id="loginErr">비밀번호가 올바르지 않습니다.</div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <header><div class="wrap nav">
+    <div class="t">접수 관리자 · <b>AI 심사</b></div>
+    <div class="sp"></div>
+    <span class="keychip off" id="keyChip">xAI 키 미설정</span>
+    <button class="btn" id="keyBtn">🔑 AI 키 설정</button>
+    <button class="btn" id="logoutBtn">로그아웃</button>
+  </div></header>
+
+  <div class="wrap">
+    <div class="bar">
+      <div class="count">접수 <b id="cnt">0</b>건</div>
+      <input class="search" id="search" placeholder="이름·학교·계정·부문 검색">
+      <div class="sp"></div>
+      <button class="btn btn-p" id="judgeAll">⚡ 미심사 전체 AI 심사</button>
+      <button class="btn" id="reload">↻ 새로고침</button>
+    </div>
+    <div class="grid" id="list"></div>
+  </div>
+</div>
+
+<!-- xAI KEY DIALOG -->
+<dialog id="keyDlg"><div class="dlg">
+  <h3>🔑 xAI(Grok) API 키</h3>
+  <p>AI 심사에 사용됩니다. 키는 이 브라우저에만 저장되며(localStorage) 서버·코드에 저장되지 않습니다.</p>
+  <input type="password" id="keyInput" placeholder="xai-...">
+  <div class="row">
+    <button class="btn btn-p" id="keySave" style="flex:1;justify-content:center">저장</button>
+    <button class="btn" id="keyClear">삭제</button>
+    <button class="btn" id="keyClose">닫기</button>
+  </div>
+</div></dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ── 설정 ── */
+var SUPABASE_URL='https://mllbsqnrvhvnqvxkpxof.supabase.co';
+var SUPABASE_KEY='sb_publishable_jIcIclh6P2smjMHYjBZbfg_MiEX185n';
+var XAI_MODEL='grok-4.20-non-reasoning-latest';
+var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+var PW='', DATA=[];
+
+/* ── 로그인 ── */
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+document.getElementById('loginBtn').addEventListener('click',login);
+document.getElementById('pw').addEventListener('keydown',function(e){if(e.key==='Enter')login()});
+function login(){
+  var pw=document.getElementById('pw').value;
+  if(!pw)return;
+  document.getElementById('loginErr').style.display='none';
+  sb.rpc('충남콘테스트_관리자목록',{p_pw:pw}).then(function(res){
+    if(res.error){document.getElementById('loginErr').style.display='block';return;}
+    PW=pw; sessionStorage.setItem('adm_pw',pw);
+    document.getElementById('gate').style.display='none';
+    document.getElementById('app').style.display='block';
+    DATA=res.data||[]; render();
+  });
+}
+/* 세션 복원 */
+(function(){var p=sessionStorage.getItem('adm_pw'); if(p){document.getElementById('pw').value=p; login();}})();
+document.getElementById('logoutBtn').addEventListener('click',function(){sessionStorage.removeItem('adm_pw');location.reload()});
+document.getElementById('reload').addEventListener('click',function(){
+  sb.rpc('충남콘테스트_관리자목록',{p_pw:PW}).then(function(res){if(!res.error){DATA=res.data||[];render()}});
+});
+
+/* ── xAI 키 ── */
+function xkey(){return localStorage.getItem('xai_key')||''}
+function refreshKeyChip(){var c=document.getElementById('keyChip');if(xkey()){c.className='keychip on';c.textContent='xAI 키 설정됨'}else{c.className='keychip off';c.textContent='xAI 키 미설정'}}
+var keyDlg=document.getElementById('keyDlg');
+document.getElementById('keyBtn').addEventListener('click',function(){document.getElementById('keyInput').value=xkey();keyDlg.showModal()});
+document.getElementById('keyClose').addEventListener('click',function(){keyDlg.close()});
+document.getElementById('keySave').addEventListener('click',function(){localStorage.setItem('xai_key',document.getElementById('keyInput').value.trim());refreshKeyChip();keyDlg.close()});
+document.getElementById('keyClear').addEventListener('click',function(){localStorage.removeItem('xai_key');refreshKeyChip();keyDlg.close()});
+
+/* ── 검색 ── */
+document.getElementById('search').addEventListener('input',render);
+
+/* ── 렌더 ── */
+function render(){
+  refreshKeyChip();
+  var q=document.getElementById('search').value.trim().toLowerCase();
+  var rows=DATA.filter(function(r){
+    if(!q)return true;
+    return [r.name,r.school,r.tooning_account,r.category,r.submit_key].join(' ').toLowerCase().indexOf(q)>-1;
+  });
+  document.getElementById('cnt').textContent=DATA.length;
+  var html=rows.map(cardHTML).join('');
+  document.getElementById('list').innerHTML=html||'<div class="muted" style="padding:20px">표시할 접수가 없습니다.</div>';
+  rows.forEach(function(r){
+    var b=document.getElementById('judge_'+r.id);
+    if(b)b.addEventListener('click',function(){judgeOne(r.id)});
+  });
+}
+function cardHTML(r){
+  var e=r.extra||{}, isWt=r.category==='웹툰';
+  var when=new Date(r.updated_at||r.created_at).toLocaleString('ko-KR');
+  var result='';
+  if(isWt){
+    result='<div class="files">'+
+      (r.board_link?'<a href="'+esc(r.board_link)+'" target="_blank">🔗 투닝 보드</a>':'')+
+      (e.pdf_url?'<a href="'+esc(e.pdf_url)+'" target="_blank">📄 작품 PDF</a>':'<span class="muted">PDF 없음</span>')+'</div>';
+  }else{
+    var eps=(e.episodes||[]).map(function(ep){return '<details><summary>'+esc(ep.ep)+'화 본문 보기</summary><div class="ep">'+esc(ep.body)+'</div></details>'}).join('');
+    var imgs=(e.ai_images||[]).map(function(u,i){return '<a href="'+esc(u)+'" target="_blank">🖼️ 이미지'+(i+1)+'</a>'}).join('');
+    result='<div class="files">'+(r.board_link?'<a href="'+esc(r.board_link)+'" target="_blank">🔗 투닝 보드</a>':'')+imgs+'</div>'+
+      (e.description?'<details><summary>작품 설명 보기</summary><div class="ep">'+esc(e.description)+'</div></details>':'')+
+      (e.ai_process?'<details><summary>생성형 AI 활용 과정 보기</summary><div class="ep">'+esc(e.ai_process)+'</div></details>':'')+
+      eps;
+  }
+  return '<div class="card" id="card_'+r.id+'">'+
+    '<div class="top"><span class="nm">'+esc(r.name)+'</span>'+
+      '<span class="cat '+(isWt?'wt':'wn')+'">'+esc(r.category)+'</span>'+
+      '<span class="key">'+esc(r.submit_key||'')+'</span></div>'+
+    '<div class="rows">'+
+      '<div>🏫 <b>'+esc(r.school)+'</b> · '+esc(r.grade)+'</div>'+
+      '<div class="pi">👤 투닝계정 <b>'+esc(r.tooning_account)+'</b><br>✉️ 지도교사 <b>'+esc(r.teacher_email)+'</b></div>'+
+      '<div class="muted">접수 '+esc(when)+'</div>'+
+    '</div>'+
+    '<div class="result"><div class="lab">결과물</div>'+result+'</div>'+
+    '<div class="judge" id="jwrap_'+r.id+'">'+reviewHTML(r)+'</div>'+
+  '</div>';
+}
+function reviewHTML(r){
+  var rv=(r.extra||{}).ai_review;
+  var btn='<button class="btn btn-p" id="judge_'+r.id+'" style="padding:7px 12px">🤖 '+(rv?'재심사':'AI 심사')+'</button>';
+  if(!rv){
+    return '<div class="jhead"><span class="lab">AI 심사</span><span class="sp"></span>'+btn+'</div>'+
+      '<div class="muted">아직 심사 전입니다.</div>';
+  }
+  var keys=['주제적합성','창의성','완성도','표현력'];
+  var sc=keys.map(function(k){return '<span class="sc">'+k+' <b>'+(rv[k]==null?'-':rv[k])+'</b></span>'}).join('');
+  var total=keys.reduce(function(a,k){return a+(Number(rv[k])||0)},0);
+  var rec=(rv['추천']===true||rv['추천']==='추천')?'<span class="rec y">추천</span>':(rv['추천']===false||rv['추천']==='비추천'?'<span class="rec n">비추천</span>':'');
+  return '<div class="jhead"><span class="lab">AI 심사 결과</span><span class="sp"></span>'+
+      '<span class="total">총점 <span class="v">'+total+'</span>/40</span>'+rec+'</div>'+
+    '<div class="score">'+sc+'</div>'+
+    '<div class="verdict">'+esc(rv['총평']||'')+'</div>'+
+    '<div class="jhead" style="margin-top:8px"><span class="muted">'+esc(rv['_model']||'')+' · '+esc(rv['_at']||'')+'</span><span class="sp"></span>'+btn+'</div>';
+}
+
+/* ── AI 심사 ── */
+function buildPrompt(r){
+  var e=r.extra||{}, lines=['[부문] '+r.category];
+  if(r.category==='웹소설'){
+    if(e.description)lines.push('[작품 설명]\n'+e.description);
+    if(e.ai_process)lines.push('[생성형 AI 활용 과정]\n'+e.ai_process);
+    (e.episodes||[]).forEach(function(ep){lines.push('['+ep.ep+'화]\n'+String(ep.body||'').slice(0,2500))});
+  }else{
+    lines.push('[제출물] 투닝 보드 링크: '+(r.board_link||'없음')+' / PDF: '+(e.pdf_url?'제출됨':'없음'));
+    lines.push('※ 웹툰은 이미지(PDF) 기반이라 본문 텍스트가 없습니다. 제출 완비성과 메타 정보 위주로 평가하고, 시각적 완성도는 수동 검토가 필요함을 총평에 명시하세요.');
+  }
+  var body=lines.join('\n\n');
+  if(body.length>9000)body=body.slice(0,9000)+'\n…(이하 생략)';
+  return body;
+}
+function judgeOne(id){
+  var key=xkey();
+  if(!key){alert('먼저 우측 상단 「AI 키 설정」에서 xAI(Grok) API 키를 입력해 주세요.');return;}
+  var r=DATA.find(function(x){return x.id===id}); if(!r)return;
+  var wrap=document.getElementById('jwrap_'+id);
+  wrap.innerHTML='<div class="jhead"><span class="lab">AI 심사</span><span class="sp"></span><span class="spin"></span> <span class="muted" style="margin-left:6px">심사 중…</span></div>';
+  var sys='너는 충청남도교육청 청소년(초·중·고) 디지털 콘텐츠 창작 공모전(웹툰/웹소설)의 공정하고 엄격한 심사위원이다. '+
+    '제공된 작품 정보를 평가해 반드시 아래 JSON 형식으로만 답하라. 점수는 0~10 사이 정수. '+
+    '키: 주제적합성, 창의성, 완성도, 표현력 (각 정수), 총평 (200자 이내 한국어 한두 문장), 추천 (true/false). '+
+    '학생 수준을 고려하되 근거 있게 평가하라.';
+  var payload={model:XAI_MODEL,temperature:0.3,response_format:{type:'json_object'},
+    messages:[{role:'system',content:sys},{role:'user',content:buildPrompt(r)}]};
+  fetch('https://api.x.ai/v1/chat/completions',{method:'POST',
+    headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+    body:JSON.stringify(payload)})
+  .then(function(res){return res.json()})
+  .then(function(d){
+    if(d.error)throw new Error(d.error.message||d.error);
+    var content=d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
+    var rv=JSON.parse(content);
+    rv._model=XAI_MODEL; rv._at=new Date().toLocaleString('ko-KR');
+    return sb.rpc('충남콘테스트_관리자심사저장',{p_pw:PW,p_id:id,p_review:rv}).then(function(s){
+      if(s.error)throw s.error;
+      r.extra=r.extra||{}; r.extra.ai_review=rv;
+      wrap.innerHTML=reviewHTML(r);
+      var b=document.getElementById('judge_'+id); if(b)b.addEventListener('click',function(){judgeOne(id)});
+    });
+  })
+  .catch(function(err){
+    wrap.innerHTML='<div class="jhead"><span class="lab">AI 심사</span></div><div class="muted" style="color:var(--warn)">심사 실패: '+esc((err&&err.message)||err)+'</div>'+
+      '<button class="btn btn-p" id="judge_'+id+'" style="margin-top:8px;padding:7px 12px">🤖 다시 시도</button>';
+    var b=document.getElementById('judge_'+id); if(b)b.addEventListener('click',function(){judgeOne(id)});
+  });
+}
+/* 전체(미심사) 순차 심사 */
+document.getElementById('judgeAll').addEventListener('click',function(){
+  if(!xkey()){alert('먼저 「AI 키 설정」에서 xAI(Grok) API 키를 입력해 주세요.');return;}
+  var pending=DATA.filter(function(r){return !(r.extra&&r.extra.ai_review)});
+  if(!pending.length){alert('미심사 접수가 없습니다.');return;}
+  if(!confirm('미심사 '+pending.length+'건을 순차로 AI 심사합니다. 진행할까요?'))return;
+  var i=0;
+  (function next(){
+    if(i>=pending.length){alert('전체 심사 완료');return;}
+    var id=pending[i++].id;
+    // judgeOne 은 비동기 → 완료 후 다음으로
+    judgeSeq(id,next);
+  })();
+});
+function judgeSeq(id,done){
+  var key=xkey(), r=DATA.find(function(x){return x.id===id});
+  var wrap=document.getElementById('jwrap_'+id);
+  if(wrap)wrap.innerHTML='<div class="jhead"><span class="lab">AI 심사</span><span class="sp"></span><span class="spin"></span></div>';
+  var sys='너는 충청남도교육청 청소년 디지털 콘텐츠 창작 공모전 심사위원이다. 반드시 JSON으로만 답하라. '+
+    '키: 주제적합성,창의성,완성도,표현력(각 0~10 정수), 총평(한국어 한두 문장), 추천(true/false).';
+  fetch('https://api.x.ai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+    body:JSON.stringify({model:XAI_MODEL,temperature:0.3,response_format:{type:'json_object'},
+      messages:[{role:'system',content:sys},{role:'user',content:buildPrompt(r)}]})})
+  .then(function(res){return res.json()}).then(function(d){
+    var rv=JSON.parse(d.choices[0].message.content); rv._model=XAI_MODEL; rv._at=new Date().toLocaleString('ko-KR');
+    return sb.rpc('충남콘테스트_관리자심사저장',{p_pw:PW,p_id:id,p_review:rv}).then(function(){
+      r.extra=r.extra||{}; r.extra.ai_review=rv;
+      if(wrap){wrap.innerHTML=reviewHTML(r);var b=document.getElementById('judge_'+id);if(b)b.addEventListener('click',function(){judgeOne(id)});}
+    });
+  }).then(function(){setTimeout(done,400)}).catch(function(){setTimeout(done,400)});
+}
+</script>
+</body>
+</html>
