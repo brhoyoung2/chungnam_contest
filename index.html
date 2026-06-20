@@ -50,7 +50,7 @@
   .nav-cta:hover{background:var(--pink-dark);transform:translateY(-1px)}
 
   /* ── HERO ── */
-  .hero{position:relative;overflow:hidden;padding:148px 0 128px;text-align:center}
+  .hero{position:relative;overflow:hidden;padding:200px 0 176px;text-align:center}
   .hero::before{content:"";position:absolute;inset:0;z-index:-1;
     background:
       radial-gradient(58% 80% at 50% -12%,rgba(255,39,120,.18),transparent 60%),
@@ -234,9 +234,9 @@
 
   /* ── PHOTO MARQUEE ── */
   .marquee{padding:8px 0 4px;overflow:hidden}
-  .mq-row{display:flex;width:max-content;animation:mq-left 46s linear infinite}
+  .mq-row{display:flex;width:max-content;animation:mq-left 46s linear infinite;
+    will-change:transform;backface-visibility:hidden}
   .mq-row.rev{animation-name:mq-right;margin-top:16px}
-  .mq-row:hover{animation-play-state:paused}
   .mq-group{display:flex;gap:16px;padding-right:16px;flex-shrink:0}
   .mq-row img{height:188px;width:auto;border-radius:16px;object-fit:cover;box-shadow:var(--shadow-sm);
     border:1px solid var(--pink-line)}
@@ -288,6 +288,7 @@
   @media(max-width:680px){
     .prize-grid{grid-template-columns:1fr 1fr}
     .mq-row img{height:140px}
+    .hero{padding:104px 0 88px}
     .hero-orgs{gap:13px;padding:10px 20px}
     .hero-orgs .org-cne{height:26px}
     .hero-orgs .org-tn{height:18px}
