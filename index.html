@@ -257,6 +257,7 @@
   .prize:hover{transform:translateY(-3px);border-color:var(--pink)}
   .prize img{width:100%;height:150px;object-fit:contain;display:block;margin-bottom:10px;
     background:#fff;border-radius:12px}
+  .prize img.logo{object-fit:contain;padding:34px 18px;background:var(--pink-soft)}
   .prize .e{font-size:30px}
   .prize .n{font-weight:800;font-size:15.5px;margin-top:4px;letter-spacing:-.02em}
   .prize .d{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
@@ -280,8 +281,10 @@
   .modal-body{padding:18px 22px 26px}
   .hof-group{font-weight:800;font-size:14px;color:var(--pink-dark);margin:18px 0 10px}
   .hof-group:first-child{margin-top:4px}
+  .hof-items{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:4px}
   .hof-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--pink-line);
-    border-radius:14px;margin-bottom:9px;transition:.15s}
+    border-radius:14px;transition:.15s}
+  @media(max-width:560px){.hof-items{grid-template-columns:1fr}}
   .hof-item:hover{border-color:var(--pink);background:var(--pink-soft)}
   .hof-item .meta{flex:1;min-width:0}
   .hof-item .nm{font-weight:800;font-size:14.5px}
@@ -409,7 +412,7 @@
       <div class="prize"><img src="image/prize-watch.jpg" alt="갤럭시 워치" loading="lazy"><div class="n">갤럭시 워치</div><div class="d">최우수작</div></div>
       <div class="prize"><img src="image/prize-buds.jpg" alt="갤럭시 버즈" loading="lazy"><div class="n">갤럭시 버즈</div><div class="d">우수작</div></div>
       <div class="prize"><img src="image/prize-voucher.jpg" alt="문화상품권 5만원" loading="lazy"><div class="n">문화상품권 5만원</div><div class="d">장려작</div></div>
-      <div class="prize"><img src="image/prize-pro.jpg" alt="투닝 Pro 1년권" loading="lazy"><div class="n">투닝 Pro 1년권</div><div class="d">+ 10,000냥이 · 전 수상자</div></div>
+      <div class="prize"><img class="logo" src="image/tool-editor.svg" alt="투닝 Pro 1년권" loading="lazy"><div class="n">투닝 Pro 1년권</div><div class="d">+ 10,000냥이 · 전 수상자</div></div>
     </div>
     <div class="prize-note">
       <span class="pill">🏅 전 수상자에게 투닝 Pro 1년권 &amp; 10,000냥이 지급</span>
@@ -925,11 +928,13 @@ var HOF=[
   var html='';
   HOF.forEach(function(grp){
     html+='<div class="hof-group">'+grp.g+'</div>';
+    html+='<div class="hof-items">';
     grp.list.forEach(function(it){
       html+='<div class="hof-item">'+
         '<div class="meta"><div class="nm">'+it.n+'</div><div class="sc">'+it.s+'</div></div>'+
         '<a class="go" href="'+it.url+'" target="_blank" rel="noopener">작품 보기 →</a></div>';
     });
+    html+='</div>';
   });
   document.getElementById('hofList').innerHTML=html;
 })();
