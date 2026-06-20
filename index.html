@@ -50,7 +50,11 @@
   .nav-cta:hover{background:var(--pink-dark);transform:translateY(-1px)}
 
   /* ── HERO ── */
-  .hero{position:relative;overflow:hidden;padding:200px 0 176px;text-align:center}
+  .hero{position:relative;overflow:hidden;padding:104px 0 88px;text-align:center}
+  /* PC: 첫 화면을 히어로로만 꽉 채움(헤더 66px 제외) */
+  @media(min-width:769px){
+    .hero{min-height:calc(100vh - 66px);display:flex;flex-direction:column;justify-content:center;padding:48px 0}
+  }
   .hero::before{content:"";position:absolute;inset:0;z-index:-1;
     background:
       radial-gradient(58% 80% at 50% -12%,rgba(255,39,120,.18),transparent 60%),
@@ -288,7 +292,6 @@
   @media(max-width:680px){
     .prize-grid{grid-template-columns:1fr 1fr}
     .mq-row img{height:140px}
-    .hero{padding:104px 0 88px}
     .hero-orgs{gap:13px;padding:10px 20px}
     .hero-orgs .org-cne{height:26px}
     .hero-orgs .org-tn{height:18px}
@@ -337,17 +340,24 @@
 <!-- PHOTO MARQUEE (지난 대회 현장) -->
 <section class="band-photos">
 <div class="marquee" aria-hidden="true">
-  <div class="mq-row">
-    <div class="mq-group"><img src="image/126624_80966_3739.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/e0061eb80d70d.jpg" alt=""></div>
-    <div class="mq-group"><img src="image/126624_80966_3739.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/e0061eb80d70d.jpg" alt=""></div>
-  </div>
-  <div class="mq-row rev">
-    <div class="mq-group"><img src="image/e0061eb80d70d.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/126624_80966_3739.jpg" alt=""></div>
-    <div class="mq-group"><img src="image/e0061eb80d70d.jpg" alt=""><img src="image/b884342834fe5.jpg" alt=""><img src="image/85c7c659c74e4.jpg" alt=""><img src="image/25f0f8977d2d2.jpg" alt=""><img src="image/12e5b6594245a.jpg" alt=""><img src="image/126624_80966_3739.jpg" alt=""></div>
-  </div>
+  <div class="mq-row" id="mqRow1"></div>
+  <div class="mq-row rev" id="mqRow2"></div>
 </div>
 <p class="mq-cap">지난 「AI 로봇 끝장 개발 한마당」 현장</p>
 </section>
+<script>
+(function(){
+  var imgs=['126624_80966_3739','12e5b6594245a','25f0f8977d2d2','85c7c659c74e4','b884342834fe5','e0061eb80d70d'];
+  /* 한 그룹 안에 이미지를 충분히 반복(어떤 화면 폭보다도 넓게) → 2그룹 -50% 스크롤이 빈공간 없이 매끄럽게 이어짐 */
+  function build(id,list){
+    var unit=list.map(function(n){return '<img src="image/'+n+'.jpg" alt="">'}).join('');
+    var group='<div class="mq-group">'+unit+unit+unit+'</div>'; /* 18장/그룹 */
+    var el=document.getElementById(id); if(el) el.innerHTML=group+group;
+  }
+  build('mqRow1', imgs);
+  build('mqRow2', imgs.slice().reverse());
+})();
+</script>
 
 <!-- GUIDE -->
 <section id="guide" class="band-cream">
