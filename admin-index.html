@@ -158,12 +158,13 @@ document.getElementById('reload').addEventListener('click',function(){
 });
 
 /* ── xAI 키 ── */
-function xkey(){return localStorage.getItem('xai_key')||''}
+function cleanKey(v){var m=String(v||'').match(/xai-[A-Za-z0-9_-]+/);return m?m[0]:String(v||'').trim();}
+function xkey(){return cleanKey(localStorage.getItem('xai_key'))}
 function refreshKeyChip(){var c=document.getElementById('keyChip');if(xkey()){c.className='keychip on';c.textContent='xAI 키 설정됨'}else{c.className='keychip off';c.textContent='xAI 키 미설정'}}
 var keyDlg=document.getElementById('keyDlg');
 document.getElementById('keyBtn').addEventListener('click',function(){document.getElementById('keyInput').value=xkey();keyDlg.showModal()});
 document.getElementById('keyClose').addEventListener('click',function(){keyDlg.close()});
-document.getElementById('keySave').addEventListener('click',function(){localStorage.setItem('xai_key',document.getElementById('keyInput').value.trim());refreshKeyChip();keyDlg.close()});
+document.getElementById('keySave').addEventListener('click',function(){localStorage.setItem('xai_key',cleanKey(document.getElementById('keyInput').value));refreshKeyChip();keyDlg.close()});
 document.getElementById('keyClear').addEventListener('click',function(){localStorage.removeItem('xai_key');refreshKeyChip();keyDlg.close()});
 
 /* ── 검색 ── */
