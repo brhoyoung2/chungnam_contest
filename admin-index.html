@@ -192,9 +192,11 @@ function cardHTML(r){
   var when=new Date(r.updated_at||r.created_at).toLocaleString('ko-KR');
   var result='';
   if(isWt){
+    var wtImgs=(e.ai_images||[]).map(function(u,i){return '<a href="'+esc(u)+'" target="_blank">🖼️ 이미지'+(i+1)+'</a>'}).join('');
     result='<div class="files">'+
       (r.board_link?'<a href="'+esc(r.board_link)+'" target="_blank">🔗 투닝 보드</a>':'')+
-      (e.pdf_url?'<a href="'+esc(e.pdf_url)+'" target="_blank">📄 작품 PDF</a>':'<span class="muted">PDF 없음</span>')+'</div>';
+      (e.pdf_url?'<a href="'+esc(e.pdf_url)+'" target="_blank">📄 작품 PDF</a>':'<span class="muted">PDF 없음</span>')+wtImgs+'</div>'+
+      (e.ai_process?'<details><summary>생성형 AI 활용 과정 보기</summary><div class="ep">'+esc(e.ai_process)+'</div></details>':'');
   }else{
     var eps=(e.episodes||[]).map(function(ep){return '<details><summary>'+esc(ep.ep)+'화 본문 보기</summary><div class="ep">'+esc(ep.body)+'</div></details>'}).join('');
     var imgs=(e.ai_images||[]).map(function(u,i){return '<a href="'+esc(u)+'" target="_blank">🖼️ 이미지'+(i+1)+'</a>'}).join('');
@@ -243,7 +245,8 @@ function buildPrompt(r){
     (e.episodes||[]).forEach(function(ep){lines.push('['+ep.ep+'화]\n'+String(ep.body||'').slice(0,2500))});
   }else{
     lines.push('[제출물] 투닝 보드 링크: '+(r.board_link||'없음')+' / PDF: '+(e.pdf_url?'제출됨':'없음'));
-    lines.push('※ 웹툰은 이미지(PDF) 기반이라 본문 텍스트가 없습니다. 제출 완비성과 메타 정보 위주로 평가하고, 시각적 완성도는 수동 검토가 필요함을 총평에 명시하세요.');
+    if(e.ai_process)lines.push('[생성형 AI 활용 과정]\n'+e.ai_process);
+    lines.push('※ 웹툰은 이미지(PDF) 기반이라 본문 텍스트가 없습니다. 제출 완비성·생성형 AI 활용 과정·메타 정보 위주로 평가하고, 시각적 완성도는 수동 검토가 필요함을 총평에 명시하세요.');
   }
   var body=lines.join('\n\n');
   if(body.length>9000)body=body.slice(0,9000)+'\n…(이하 생략)';

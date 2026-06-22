@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>제5회 AI 로봇 끝장 개발 한마당 · 주제2 작품 접수</title>
+<title>2026 제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2 작품 접수</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <!-- ── 링크 공유 미리보기 (카카오톡·SNS Open Graph) ── -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="충남교육청 × 투닝 공모전">
-<meta property="og:title" content="제5회 AI 로봇 끝장 개발 한마당 · 주제2 디지털 콘텐츠 창작">
-<meta property="og:description" content="AI 도구 투닝으로 웹툰·웹소설을 만들어 출품하는 비대면 온라인 공모전">
+<meta property="og:title" content="2026 제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2">
+<meta property="og:description" content="AI 도구 활용 디지털 콘텐츠 창작 — 웹툰·웹소설을 만들어 출품하는 비대면 온라인 공모전">
 <meta property="og:url" content="https://c-contest.tooning.io/">
 <meta property="og:image" content="https://c-contest.tooning.io/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="675">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="제5회 AI 로봇 끝장 개발 한마당 · 주제2 디지털 콘텐츠 창작">
-<meta name="twitter:description" content="AI 도구 투닝으로 웹툰·웹소설을 만들어 출품하는 비대면 온라인 공모전">
+<meta name="twitter:title" content="2026 제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2">
+<meta name="twitter:description" content="AI 도구 활용 디지털 콘텐츠 창작 — 웹툰·웹소설을 만들어 출품하는 비대면 온라인 공모전">
 <meta name="twitter:image" content="https://c-contest.tooning.io/og-image.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
@@ -137,14 +137,26 @@
   .card .tags{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
   .tag{font-size:12px;font-weight:700;background:var(--pink-soft);color:var(--pink-dark);padding:5px 11px;border-radius:999px}
 
+  /* 주제 발표 안내 */
+  .notice{display:flex;gap:14px;align-items:flex-start;background:var(--white);border:1px dashed var(--pink);
+    border-radius:var(--radius);padding:18px 20px;margin-top:18px;box-shadow:var(--shadow-sm)}
+  .notice .ni{font-size:24px;line-height:1.2}
+  .notice .nt{font-weight:800;font-size:15.5px;margin-bottom:4px}
+  .notice .nt .soon{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:var(--pink);
+    border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:middle}
+  .notice .nd{font-size:13.5px;color:var(--ink-soft)}
+  .notice .nd b{color:var(--pink-dark)}
+
   .tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
   .tool{flex:1;min-width:120px;text-align:center;background:var(--white);border:1px solid var(--pink-line);
-    border-radius:14px;padding:16px 10px;transition:.18s;text-decoration:none;color:inherit;display:block}
+    border-radius:14px;padding:16px 12px;transition:.18s;text-decoration:none;color:inherit;display:block}
   .tool:hover{border-color:var(--pink);transform:translateY(-2px)}
   .tool .e{font-size:22px}
-  .tool .tlogo{height:26px;width:auto;max-width:100%;display:block;margin:4px auto 12px;object-fit:contain}
-  .tool .n{font-weight:800;font-size:14px;margin-top:6px}
-  .tool .d{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  /* 로고 크기 통일: 동일 높이의 박스 안에서 가운데 정렬 */
+  .tool .logo-box{height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+  .tool .tlogo{max-height:28px;max-width:120px;width:auto;height:auto;display:block;object-fit:contain}
+  .tool .n{font-weight:800;font-size:14px}
+  .tool .d{font-size:12px;color:var(--ink-soft);margin-top:3px;line-height:1.4}
 
   /* ── FORM ── */
   .form-card{background:var(--white);border:1px solid var(--pink-line);border-radius:var(--radius);padding:32px;box-shadow:var(--shadow)}
@@ -343,7 +355,7 @@
 <section class="hero">
   <div class="wrap">
     <div><span class="hero-orgs"><img class="org-cne" src="image/logo-cne.png" alt="충청남도교육청"><span class="org-x">×</span><img class="org-tn" src="image/logo-tooning.png" alt="투닝"></span></div>
-    <h1>제5회 AI 로봇 끝장 개발 한마당<br><span class="hl">주제2</span> 디지털 콘텐츠 창작</h1>
+    <h1>2026 제5회 인공지능 로봇 끝장 개발(해커톤) 한마당<br><span class="hl">주제 2</span> AI 도구 활용 디지털 콘텐츠 창작</h1>
     <p class="sub">AI 도구 <strong>투닝</strong>으로 웹툰·웹소설을 만들어 출품하는 비대면 온라인 공모전</p>
     <div class="hero-btns">
       <a href="#apply" class="btn btn-primary">작품 접수하기</a>
@@ -392,23 +404,32 @@
         <img class="thumb" src="image/webtoon.jpg" alt="웹툰" loading="lazy">
         <h3>웹툰</h3>
         <p>투닝을 활용해 표지를 포함한 한 편의 웹툰을 완성합니다.</p>
-        <div class="tags"><span class="tag">총 10컷</span><span class="tag">표지 포함</span></div>
+        <div class="tags"><span class="tag">총 10컷 이상</span><span class="tag">표지 포함</span></div>
       </div>
       <div class="card">
         <img class="thumb" src="image/webnovel.jpg" alt="웹소설" loading="lazy">
         <h3>웹소설</h3>
         <p>투닝으로 기획·집필한 3화 분량의 웹소설을 출품합니다.</p>
-        <div class="tags"><span class="tag">총 3화</span><span class="tag">4,500자 이상</span><span class="tag">화당 1,500자↑</span></div>
+        <div class="tags"><span class="tag">총 3화</span><span class="tag">화당 1,500자 이상</span></div>
+      </div>
+    </div>
+
+    <!-- 작품 주제 안내 (발표 전) -->
+    <div class="notice">
+      <div class="ni">🗓️</div>
+      <div>
+        <div class="nt">작품 주제 <span class="soon">발표 예정</span></div>
+        <div class="nd">웹툰·웹소설 모두 <b>공모전에서 제시하는 공통 주제</b>에 맞춰 제작해야 합니다. 주제는 접수 첫날인 <b>2026년 7월 2일(목)</b> 도교육청 누리집과 본 접수 페이지를 통해 공개될 예정입니다. (현재는 발표 전이에요)</div>
       </div>
     </div>
 
     <div style="margin-top:34px">
       <h2>제작 도구 — 투닝 4종</h2>
       <div class="tools">
-        <a class="tool" href="https://tooning.io/gpt-information" target="_blank" rel="noopener"><img class="tlogo" src="image/tool-character.svg" alt="투닝 캐릭터"><div class="n">투닝 캐릭터</div><div class="d">스토리작가 · 웹소설</div></a>
-        <a class="tool" href="https://tooning.io/editor-information" target="_blank" rel="noopener"><img class="tlogo" src="image/tool-editor.svg" alt="투닝 에디터"><div class="n">투닝 에디터</div><div class="d">웹툰 제작</div></a>
-        <a class="tool" href="https://tooning.io/magic-information" target="_blank" rel="noopener"><img class="tlogo" src="image/tool-magic.svg" alt="투닝 매직"><div class="n">투닝 매직</div><div class="d">이미지 생성</div></a>
-        <a class="tool" href="https://tooning.io/board-information" target="_blank" rel="noopener"><img class="tlogo" src="image/tool-board.svg" alt="투닝 보드"><div class="n">투닝 보드</div><div class="d">제출용 링크</div></a>
+        <a class="tool" href="https://tooning.io/gpt-information" target="_blank" rel="noopener"><div class="logo-box"><img class="tlogo" src="image/tool-character.svg" alt="투닝 캐릭터"></div><div class="n">투닝 캐릭터</div><div class="d">AI로 캐릭터·이야기를 만드는<br>웹소설 작가 도구</div></a>
+        <a class="tool" href="https://tooning.io/editor-information" target="_blank" rel="noopener"><div class="logo-box"><img class="tlogo" src="image/tool-editor.svg" alt="투닝 에디터"></div><div class="n">투닝 에디터</div><div class="d">드래그로 완성하는<br>웹툰 제작 도구</div></a>
+        <a class="tool" href="https://tooning.io/magic-information" target="_blank" rel="noopener"><div class="logo-box"><img class="tlogo" src="image/tool-magic.svg" alt="투닝 매직"></div><div class="n">투닝 매직</div><div class="d">글을 그림으로 바꾸는<br>이미지 생성 AI</div></a>
+        <a class="tool" href="https://tooning.io/board-information" target="_blank" rel="noopener"><div class="logo-box"><img class="tlogo" src="image/tool-board.svg" alt="투닝 보드"></div><div class="n">투닝 보드</div><div class="d">작품을 정리해<br>제출 링크를 만드는 도구</div></a>
       </div>
       <p class="hint" style="margin-top:12px"><strong>웹툰·웹소설 모두</strong> 투닝 도구로 제작합니다. 특히 <strong>웹소설</strong>은 「투닝 캐릭터(스토리작가)」로 기획·집필하면 편리해요. 완성 후 작품을 <strong>투닝 보드</strong>로 옮기고, 보드 <strong>링크를 복사</strong>해 아래 접수 폼에 제출합니다. (도구별 자세한 사용법은 <a href="#faq">자주 묻는 질문</a> 참고)</p>
     </div>
@@ -492,7 +513,7 @@
       <div class="field">
         <label>참가 부문 <span class="req">*</span> <span class="hint" style="font-weight:500">— 1인 1작품, 중복·변경 시 탈락</span></label>
         <div class="seg">
-          <label><input type="radio" name="cat" value="웹툰"><div class="opt"><div class="t">🎨 웹툰</div><div class="s">10컷 · 표지 포함</div></div></label>
+          <label><input type="radio" name="cat" value="웹툰"><div class="opt"><div class="t">🎨 웹툰</div><div class="s">10컷 이상 · 표지 포함</div></div></label>
           <label><input type="radio" name="cat" value="웹소설"><div class="opt"><div class="t">📖 웹소설</div><div class="s">3화 · 4,500자 이상</div></div></label>
         </div>
       </div>
@@ -509,6 +530,12 @@
           <label>작품 PDF 파일 <span class="req">*</span></label>
           <input type="file" id="t_pdf" accept="application/pdf,.pdf">
           <p class="hint">완성한 웹툰을 PDF로 저장해 업로드해 주세요. (최대 20MB)</p>
+        </div>
+        <div class="field">
+          <label>생성형 AI 활용 과정 <span class="req">*</span></label>
+          <textarea id="t_ai" placeholder="투닝(에디터·매직 등) AI를 어떻게 활용했는지 적어주세요."></textarea>
+          <p class="hint" style="margin-bottom:8px">활용 과정을 보여주는 이미지(캡처 등)를 첨부할 수 있어요. <strong>(선택 · 여러 장 가능)</strong></p>
+          <input type="file" id="t_ai_imgs" accept="image/*" multiple>
         </div>
       </div>
 
@@ -576,8 +603,8 @@
 
 <footer>
   <div class="wrap">
-    <strong>제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2</strong><br>
-    주관 충청남도교육청 미래인재과 · <span id="adminGate">공동참여 투닝</span><br>
+    <strong>2026 제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2</strong><br>
+    주관 충청남도교육청 · <span id="adminGate">공동참여 툰스퀘어</span><br>
     문의 <a href="mailto:support@tooning.io">support@tooning.io</a> · 050-7458-2020
   </div>
 </footer>
@@ -596,7 +623,7 @@
   </div>
   <div class="chat-body" id="chatBody"></div>
   <div class="quick" id="chatQuick">
-    <button>접수 기간</button><button>제출 방법</button><button>분량 기준</button><button>계정 사용</button><button>오류 문의</button>
+    <button>접수 기간</button><button>제출 방법</button><button>분량 기준</button><button>계정 사용</button><button>오류 문의</button><button>접수 확인</button>
   </div>
   <div class="chat-input">
     <input type="text" id="chatInput" placeholder="궁금한 내용을 입력하세요…">
@@ -672,8 +699,8 @@ function keyImage(key,mode){
   x.fillStyle='#FFFBFD';x.fillRect(0,0,W,H);
   x.fillStyle='#FF2778';x.fillRect(0,0,W,14);
   x.textAlign='center';
-  x.fillStyle='#1E1622';x.font="700 34px Pretendard, sans-serif";
-  x.fillText('제5회 AI 로봇 끝장 개발 한마당 · 주제2',W/2,112);
+  x.fillStyle='#1E1622';x.font="700 28px Pretendard, sans-serif";
+  x.fillText('2026 제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2',W/2,112);
   x.fillStyle='#6B6270';x.font="400 22px Pretendard, sans-serif";
   x.fillText('작품 접수 키 · 수정 / 접수 확인 시 필요',W/2,158);
   x.fillStyle='#FFEDF3';roundRectFill(x,W/2-360,206,720,150,24);
@@ -682,7 +709,7 @@ function keyImage(key,mode){
   x.fillStyle='#6B6270';x.font="400 20px Pretendard, sans-serif";
   x.fillText('이 키를 캡처/저장해 안전하게 보관하세요.',W/2,432);
   x.fillStyle='#FF2778';x.font="700 20px Pretendard, sans-serif";
-  x.fillText('chungnam-contest-q5ab.vercel.app',W/2,472);
+  x.fillText('c-contest.tooning.io',W/2,472);
   c.toBlob(function(blob){
     var fname='접수키_'+key+'.png';
     if(mode==='share' && navigator.canShare){
@@ -719,10 +746,14 @@ document.getElementById('submitBtn').addEventListener('click',function(){
   if(category==='웹툰'){
     link=document.getElementById('t_link').value.trim();
     pdfFile=document.getElementById('t_pdf').files[0];
+    ai=document.getElementById('t_ai').value.trim();
+    aiImgs=Array.prototype.slice.call(document.getElementById('t_ai_imgs').files);
     if(!link){alert('투닝 보드 작품 링크를 입력해 주세요.');return;}
     if(link.indexOf('tooning.io')===-1){alert('투닝 보드 링크(tooning.io)를 정확히 입력해 주세요.');return;}
     if(!pdfFile){alert('웹툰 작품 PDF 파일을 첨부해 주세요.');return;}
     if(pdfFile.size>20*1024*1024){alert('PDF 파일은 20MB 이하로 첨부해 주세요.');return;}
+    if(!ai){alert('생성형 AI 활용 과정을 입력해 주세요.');return;}
+    for(var w=0;w<aiImgs.length;w++){if(aiImgs[w].size>10*1024*1024){alert('첨부 이미지는 각 10MB 이하로 올려주세요.');return;}}
   }else{
     link=document.getElementById('n_link').value.trim();
     desc=document.getElementById('n_desc').value.trim();
@@ -777,8 +808,11 @@ document.getElementById('submitBtn').addEventListener('click',function(){
   /* 1) 파일 업로드 → 2) 서버 함수(SECURITY DEFINER)로 저장 */
   var prep;
   if(category==='웹툰'){
-    prep=uploadFile(pdfFile,'webtoon',acctSafe).then(function(url){
-      return {type:'webtoon', pdf_url:url};
+    prep=Promise.all([
+      uploadFile(pdfFile,'webtoon',acctSafe),
+      Promise.all(aiImgs.map(function(f){return uploadFile(f,'webtoon-ai',acctSafe)}))
+    ]).then(function(out){
+      return {type:'webtoon', pdf_url:out[0], ai_process:ai, ai_images:out[1]};
     });
   }else{
     prep=Promise.all(aiImgs.map(function(f){return uploadFile(f,'novel-ai',acctSafe)})).then(function(urls){
@@ -840,12 +874,13 @@ function botSay(t){
 }
 
 var KB=[
+  {k:['접수 확인','접수확인','내역 확인','신청 확인','접수 내역','접수내역','정상 접수','접수됐','접수 됐','제출 확인','확인하고'],a:'신청작 확인을 도와드릴게요. <b>접수 키(CNAI-…)</b> 또는 <b>본인의 투닝 계정(이메일/ID)</b>을 입력해 주시면, 접수 내역(이름·학교·부문·작품 링크)을 확인해 드립니다. 😊<br>잘못 제출하셨다면 올바른 작품으로 <b>다시 제출</b>하신 뒤 같은 계정을 알려주세요.'},
   {k:['로그인이 안','로그인 안','로그인이안','로그인','접속이 안','접속 안','접속안','로그인 문제'],a:'로그인이 안 되시는 경우, 먼저 <b>사용 중인 투닝 계정(이메일 또는 ID)</b>을 알려주세요.<br>그리고 해당 계정 정보를 담아 <a href="mailto:support@tooning.io">support@tooning.io</a>로 메일을 보내주시면, 확인 후 빠르게 도와드리겠습니다.'},
   {k:['마음대로','내맘대로','맘대로','아무 주제','아무거나','자유 주제','자유롭게','원하는 주제','원하는주제','하고 싶은','하고싶은','내가 원하는','직접 정','내가 정'],a:'작품 주제는 자유롭게 정할 수 없습니다. <b>공모전에서 제시하는 주제</b>에 맞게 제작해야 합니다.<br>주제는 접수 첫날인 <b>7월 2일</b>에 공개되니, 공개된 주제에 맞춰 작품을 준비해 주세요.'},
   {k:['주제','무슨 주제','어떤 주제','주제 공개','주제 언제','뭐 만들','무슨 내용'],a:'작품 주제는 접수 첫날인 <b>2026년 7월 2일(목)</b>에 도교육청 누리집과 접수 웹사이트를 통해 공개됩니다. 공개된 주제에 맞춰 작품을 제작해 주세요.'},
   {k:['접수','기간','언제','마감','신청 기간'],a:'<b>작품 접수 기간</b>은 2026년 7월 2일(목) 09:00 ~ 8월 17일(월) 17:00 입니다. 마감 시간 이후에는 제출이 불가합니다.'},
   {k:['제출','방법','어떻게 내','보드','링크'],a:'완성한 작품을 <b>투닝 보드</b>로 옮긴 뒤, 보드 <b>공유 → 링크 복사</b>로 받은 링크를 접수 폼에 붙여넣어 제출합니다.'},
-  {k:['분량','글자','자','컷','웹툰','웹소설','기준'],a:'<b>웹툰</b>: 총 10컷(표지 포함)<br><b>웹소설</b>: 총 3화, 4,500자 이상(화당 공백 제외 1,500자 이상)<br>둘 중 <b>1개</b>만 선택해 제출합니다.'},
+  {k:['분량','글자','자','컷','웹툰','웹소설','기준'],a:'<b>웹툰</b>: 총 10컷 이상(표지 포함)<br><b>웹소설</b>: 총 3화, 화당 1,500자 이상(공백 제외, 총 4,500자 이상)<br>둘 중 <b>1개</b>만 선택해 제출합니다.'},
   {k:['계정','유료','무료','사용 기간'],a:'유료 계정은 <b>7월 2일 ~ 8월 31일</b> 사용 가능하며, 이 기간 전후에는 자동으로 무료 계정으로 전환됩니다.'},
   {k:['오류','에러','안 돼','버그','고객센터'],a:'이용 중 오류는 투닝 고객센터로 문의해 주세요.<br>📧 support@tooning.io<br>📞 050-7458-2020'},
   {k:['잘못','다시','수정','변경','취소'],a:'올바른 작품으로 <b>다시 제출</b>하신 뒤, 저(투닝 접수 도우미)에게 <b>본인의 투닝 계정</b>과 <b>작품 링크</b>를 알려주세요. 확인 후 반영해 드리겠습니다. 😊'},
@@ -902,7 +937,7 @@ function ask(q){
   else botSay(answer(q));
 }
 
-/* ── 숨겨진 관리자 진입: '공동참여 투닝' 5회 클릭 ── */
+/* ── 숨겨진 관리자 진입: '공동참여 툰스퀘어' 5회 클릭 ── */
 (function(){
   var gate=document.getElementById('adminGate'); if(!gate)return;
   var n=0,timer=null;
@@ -918,6 +953,13 @@ document.getElementById('chatSend').addEventListener('click',send);
 document.getElementById('chatInput').addEventListener('keydown',function(e){if(e.key==='Enter')send()});
 
 /* ── 명예의 전당(지난 수상작) ── */
+/* 이름 가운데 글자 마스킹(개인정보 보호): 육태빈 → 육*빈, 김영희수 → 김**수 */
+function maskName(n){
+  n=String(n||'').trim();
+  if(n.length<=1) return n;
+  if(n.length===2) return n[0]+'*';
+  return n[0]+'*'.repeat(n.length-2)+n[n.length-1];
+}
 var HOF=[
   {g:'웹툰 · 초등',list:[
     {n:'육태빈',s:'천안용암초등학교',pz:'갤럭시 워치',url:'https://tooning.io/board/join/1235844967'},
@@ -957,7 +999,7 @@ var HOF=[
     html+='<div class="hof-items">';
     grp.list.forEach(function(it){
       html+='<div class="hof-item">'+
-        '<div class="meta"><div class="nm">'+it.n+'</div><div class="sc">'+it.s+'</div></div>'+
+        '<div class="meta"><div class="nm">'+maskName(it.n)+'</div><div class="sc">'+it.s+'</div></div>'+
         '<a class="go" href="'+it.url+'" target="_blank" rel="noopener">작품 보기 →</a></div>';
     });
     html+='</div>';
