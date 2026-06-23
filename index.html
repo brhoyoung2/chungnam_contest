@@ -302,7 +302,7 @@
     padding:3px 11px;border-radius:999px;transition:.15s;line-height:1.4}
   .howto:hover{background:var(--pink);color:#fff;border-color:var(--pink)}
   #guideModal .modal-card{max-width:1060px}
-  .guide-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .guide-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
   @media(max-width:680px){.guide-steps{grid-template-columns:1fr}}
   .guide-step{border:1px solid var(--pink-line);border-radius:16px;padding:18px;background:var(--white);
     box-shadow:var(--shadow-sm)}
@@ -1079,9 +1079,8 @@ var GUIDES={
     {t:'접수 폼에 붙여넣기', d:'복사한 링크를 「투닝 보드 작품 링크」 칸에 붙여넣어 제출합니다.', img:'image/003.jpg'}
   ]},
   pdf:{title:'📄 작품 PDF 제출 방법', steps:[
-    {t:'작품 열기', d:'제출할 웹툰 작품을 투닝에서 엽니다.', img:'image/004.jpg'},
-    {t:'PDF로 내보내기', d:'다운로드(내보내기)에서 PDF 형식을 선택해 저장합니다.', img:'image/005.jpg'},
-    {t:'파일 업로드', d:'저장한 PDF를 「파일 선택」으로 업로드합니다. (최대 20MB)', img:'image/006.jpg'}
+    {t:'작품 열기', d:'제출할 웹툰 작품을 투닝에서 연 뒤, 우측 상단의 「다운로드 → PDF 다운로드」를 클릭합니다.', img:'image/004.jpg'},
+    {t:'PDF 첨부하기', d:'다운로드한 PDF를 접수 폼의 「작품 PDF 파일 → 파일 선택」에서 첨부합니다. (최대 20MB)', img:'image/005.jpg'}
   ]}
 };
 var guideModal=document.getElementById('guideModal');
