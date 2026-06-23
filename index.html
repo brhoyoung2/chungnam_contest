@@ -296,6 +296,24 @@
   .hof-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
   .hof-cta .btn{font-size:15px}
 
+  /* ── 제출 방법 안내 버튼 / 가이드 모달 ── */
+  .howto{float:right;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;
+    border:1px solid var(--pink-line);background:var(--pink-soft);color:var(--pink-dark);
+    padding:3px 11px;border-radius:999px;transition:.15s;line-height:1.4}
+  .howto:hover{background:var(--pink);color:#fff;border-color:var(--pink)}
+  .guide-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:680px){.guide-steps{grid-template-columns:1fr}}
+  .guide-step{border:1px solid var(--pink-line);border-radius:16px;padding:16px;background:var(--white);
+    box-shadow:var(--shadow-sm)}
+  .guide-step .gnum{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+    border-radius:50%;background:var(--pink);color:#fff;font-weight:800;font-size:13px;margin-bottom:10px}
+  .guide-step .gt{font-weight:800;font-size:14.5px;margin-bottom:6px;letter-spacing:-.01em}
+  .guide-step .gd{font-size:13px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5}
+  .guide-step .gimg{position:relative;width:100%;aspect-ratio:4/3;border-radius:12px;overflow:hidden;
+    border:1px solid var(--pink-line);background:#FAF9FB;display:flex;align-items:center;justify-content:center}
+  .guide-step .gimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .guide-step .gimg .ph{font-size:12px;color:var(--ink-soft);font-weight:600}
+
   /* ── MODAL ── */
   .modal{position:fixed;inset:0;z-index:120;background:rgba(30,22,34,.55);display:none;
     align-items:center;justify-content:center;padding:40px 16px;overflow-y:auto}
@@ -492,6 +510,20 @@
   </div>
 </div>
 
+<!-- 제출 방법 안내 모달 (보드 링크 / PDF) -->
+<div class="modal" id="guideModal">
+  <div class="modal-card">
+    <div class="modal-top">
+      <div class="modal-head">
+        <span style="font-size:22px">🧭</span>
+        <span class="t" id="guideTitle">제출 방법</span>
+        <button class="x" id="guideClose" aria-label="닫기">×</button>
+      </div>
+    </div>
+    <div class="modal-body"><div class="guide-steps" id="guideSteps"></div></div>
+  </div>
+</div>
+
 <!-- APPLY -->
 <section id="apply" class="band-white">
   <div class="wrap">
@@ -535,12 +567,12 @@
       <div class="panel" id="panelWebtoon">
         <div class="panel-tag">🎨 웹툰 제출</div>
         <div class="field">
-          <label>투닝 보드 작품 링크 <span class="req">*</span></label>
+          <label>투닝 보드 작품 링크 <span class="req">*</span><button type="button" class="howto" data-guide="board">❓ 제출하는 법</button></label>
           <input type="url" id="t_link" placeholder="https://tooning.io/board/...">
           <p class="hint">투닝 보드 → 공유 → 링크 복사 후 붙여넣기</p>
         </div>
         <div class="field">
-          <label>작품 PDF 파일 <span class="req">*</span></label>
+          <label>작품 PDF 파일 <span class="req">*</span><button type="button" class="howto" data-guide="pdf">❓ 제출하는 법</button></label>
           <input type="file" id="t_pdf" accept="application/pdf,.pdf">
           <p class="hint">완성한 웹툰을 PDF로 저장해 업로드해 주세요. (최대 20MB)</p>
         </div>
@@ -556,7 +588,7 @@
       <div class="panel" id="panelNovel">
         <div class="panel-tag">📖 웹소설 제출</div>
         <div class="field">
-          <label>투닝 보드 작품 링크 <span class="req">*</span></label>
+          <label>투닝 보드 작품 링크 <span class="req">*</span><button type="button" class="howto" data-guide="board">❓ 제출하는 법</button></label>
           <input type="url" id="n_link" placeholder="https://tooning.io/board/...">
           <p class="hint">투닝 보드 → 공유 → 링크 복사 후 붙여넣기</p>
         </div>
@@ -975,34 +1007,34 @@ function maskName(n){
 }
 var HOF=[
   {g:'웹툰 · 초등',list:[
-    {n:'육태빈',s:'천안용암초등학교',pz:'갤럭시 워치',url:'https://tooning.io/board/join/1235844967'},
-    {n:'이연서',s:'아산용연초등학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/fmkibxbppn/4306664698'},
-    {n:'김예준',s:'천안가람초등학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/join/6495306309'},
-    {n:'김승주',s:'대홍초등학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/liwibgcgoc/2774798952'},
-    {n:'백지완',s:'천안용암초등학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/yubdelwbic/3351948035'}
+    {n:'육*빈',s:'천안용암초등학교',url:'https://tooning.io/board/tlvdpvccmp/9218653140'},
+    {n:'백*완',s:'천안용암초등학교',url:'https://tooning.io/board/tlvdpvccmp/2613215810'},
+    {n:'김*주',s:'대홍초등학교',url:'https://tooning.io/board/tlvdpvccmp/2768966786'},
+    {n:'김*준',s:'천안가람초등학교',url:'https://tooning.io/board/tlvdpvccmp/1484647366'},
+    {n:'이*서',s:'아산용연초등학교',url:'https://tooning.io/board/tlvdpvccmp/9813002140'}
   ]},
   {g:'웹툰 · 중등',list:[
-    {n:'조성현',s:'논산중학교',pz:'갤럭시 워치',url:'https://tooning.io/board/ikmbgdhvfn/8135479630'},
-    {n:'전태영',s:'논산대건중학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/xshaujeunh/5195834227'},
-    {n:'진하율',s:'논산중학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/rgmvpicthd/4095090303'},
-    {n:'김시후',s:'천안동중학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/vgqrmubrln/2712722515'}
+    {n:'김*후',s:'천안동중학교',url:'https://tooning.io/board/tlvdpvccmp/9661341103'},
+    {n:'진*율',s:'논산중학교',url:'https://tooning.io/board/tlvdpvccmp/7576105150'},
+    {n:'전*영',s:'논산대건중학교',url:'https://tooning.io/board/tlvdpvccmp/7393242712'},
+    {n:'조*현',s:'논산중학교',url:'https://tooning.io/board/tlvdpvccmp/0049954214'}
   ]},
   {g:'웹툰 · 고등',list:[
-    {n:'송지홍',s:'논산대건고등학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/join/7914927529'},
-    {n:'이소윤',s:'서산중앙고등학교',pz:'갤럭시 워치',url:'https://tooning.io/board/mxqmdpzjgk/8309406714'}
+    {n:'이*윤',s:'서산중앙고등학교',url:'https://tooning.io/board/tlvdpvccmp/5833272800'},
+    {n:'송*홍',s:'논산대건고등학교',url:'https://tooning.io/board/tlvdpvccmp/2294711637'}
   ]},
   {g:'웹소설 · 초등',list:[
-    {n:'이현성',s:'송학초등학교',pz:'갤럭시 워치',url:'https://tooning.io/board/fmajhsojhm/9489063810'},
-    {n:'임서나',s:'천안용암초등학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/svveywfogt/9442907898'},
-    {n:'도윤서',s:'천안봉명초등학교',pz:'문화상품권 5만원',url:'https://tooning.io/board/wkglbvqink/0400705189'}
+    {n:'도*서',s:'천안봉명초등학교',url:'https://tooning.io/board/tlvdpvccmp/4471956764'},
+    {n:'임*나',s:'천안용암초등학교',url:'https://tooning.io/board/tlvdpvccmp/7122923193'},
+    {n:'이*성',s:'송학초등학교',url:'https://tooning.io/board/tlvdpvccmp/2976828444'}
   ]},
   {g:'웹소설 · 중등',list:[
-    {n:'하수아',s:'동강중학교',pz:'갤럭시 워치',url:'https://tooning.io/board/sflobzaokk/9902342572'},
-    {n:'임원일',s:'논산중학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/yoihrzpqym/1377543970'}
+    {n:'임*일',s:'논산중학교',url:'https://tooning.io/board/tlvdpvccmp/3105984014'},
+    {n:'하*아',s:'동강중학교',url:'https://tooning.io/board/tlvdpvccmp/4975540890'}
   ]},
   {g:'웹소설 · 고등',list:[
-    {n:'김건범',s:'서산중앙고등학교',pz:'갤럭시 워치',url:'https://tooning.io/board/rcrvggziqr/6378593889'},
-    {n:'김수현',s:'설화고등학교',pz:'갤럭시 버즈',url:'https://tooning.io/board/join/6879684241'}
+    {n:'김*현',s:'설화고등학교',url:'https://tooning.io/board/tlvdpvccmp/1365940091'},
+    {n:'김*범',s:'서산중앙고등학교',url:'https://tooning.io/board/tlvdpvccmp/8457657551'}
   ]}
 ];
 (function(){
@@ -1036,6 +1068,44 @@ document.getElementById('hofBtn').addEventListener('click',function(){hofShowTab
 document.getElementById('hofClose').addEventListener('click',function(){hofModal.classList.remove('open')});
 hofModal.addEventListener('click',function(e){if(e.target===hofModal)hofModal.classList.remove('open')});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')hofModal.classList.remove('open')});
+
+/* ── 제출 방법 안내(보드 링크 / PDF) ── */
+/* 이미지는 추후 image/ 폴더에 넣으면 자동 표시됩니다. (없으면 '이미지 준비 중' 표시) */
+var GUIDES={
+  board:{title:'🔗 투닝 보드 링크 제출 방법', steps:[
+    {t:'작품을 투닝 보드에 정리', d:'완성한 작품을 투닝 보드로 옮겨 한 페이지에 정리합니다.', img:'image/guide-board-1.png'},
+    {t:'공유 → 링크 복사', d:'보드 우측 상단의 「공유」 버튼을 눌러 작품 링크를 복사합니다.', img:'image/guide-board-2.png'},
+    {t:'접수 폼에 붙여넣기', d:'복사한 링크를 「투닝 보드 작품 링크」 칸에 붙여넣어 제출합니다.', img:'image/guide-board-3.png'}
+  ]},
+  pdf:{title:'📄 작품 PDF 제출 방법', steps:[
+    {t:'작품 열기', d:'제출할 웹툰 작품을 투닝에서 엽니다.', img:'image/guide-pdf-1.png'},
+    {t:'PDF로 내보내기', d:'다운로드(내보내기)에서 PDF 형식을 선택해 저장합니다.', img:'image/guide-pdf-2.png'},
+    {t:'파일 업로드', d:'저장한 PDF를 「파일 선택」으로 업로드합니다. (최대 20MB)', img:'image/guide-pdf-3.png'}
+  ]}
+};
+var guideModal=document.getElementById('guideModal');
+function openGuide(type){
+  var g=GUIDES[type]; if(!g)return;
+  document.getElementById('guideTitle').textContent=g.title;
+  document.getElementById('guideSteps').innerHTML=g.steps.map(function(s,i){
+    return '<div class="guide-step">'+
+      '<div class="gnum">'+(i+1)+'</div>'+
+      '<div class="gt">'+esc(s.t)+'</div>'+
+      '<div class="gd">'+esc(s.d)+'</div>'+
+      '<div class="gimg"><span class="ph">이미지 준비 중</span>'+
+        '<img src="'+s.img+'" alt="'+(i+1)+'단계" onerror="this.remove()"></div>'+
+    '</div>';
+  }).join('');
+  guideModal.scrollTop=0;
+  guideModal.classList.add('open');
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+document.querySelectorAll('.howto').forEach(function(b){
+  b.addEventListener('click',function(){openGuide(b.getAttribute('data-guide'))});
+});
+document.getElementById('guideClose').addEventListener('click',function(){guideModal.classList.remove('open')});
+guideModal.addEventListener('click',function(e){if(e.target===guideModal)guideModal.classList.remove('open')});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')guideModal.classList.remove('open')});
 
 /* ── 대회 안내문 다운로드 ── */
 document.getElementById('dlBtn').addEventListener('click',function(){
