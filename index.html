@@ -301,10 +301,17 @@
     align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
   .modal.open{display:flex;animation:pop .22s ease}
   .modal-card{background:#fff;border-radius:22px;max-width:760px;width:100%;box-shadow:0 40px 90px -30px rgba(255,39,120,.6);overflow:hidden}
-  .modal-head{position:sticky;top:0;background:linear-gradient(135deg,var(--pink),var(--pink-dark));color:#fff;
+  .modal-top{position:sticky;top:0;z-index:2}
+  .modal-head{background:linear-gradient(135deg,var(--pink),var(--pink-dark));color:#fff;
     padding:20px 24px;display:flex;align-items:center;gap:10px}
   .modal-head .t{font-weight:800;font-size:18px;letter-spacing:-.02em}
   .modal-head .x{margin-left:auto;background:none;border:none;color:#fff;font-size:26px;cursor:pointer;line-height:1}
+  /* 명예의 전당 탭 */
+  .hof-tabs{display:flex;gap:8px;background:#fff;padding:12px 22px;border-bottom:1px solid var(--pink-line)}
+  .hof-tab{flex:1;font-family:inherit;font-weight:800;font-size:14.5px;cursor:pointer;padding:10px 12px;
+    border-radius:12px;border:1px solid var(--pink-line);background:#fff;color:var(--ink-soft);transition:.15s}
+  .hof-tab:hover{border-color:var(--pink);color:var(--pink)}
+  .hof-tab.on{background:var(--pink);color:#fff;border-color:var(--pink)}
   .modal-body{padding:18px 22px 26px}
   .hof-group{font-weight:800;font-size:14px;color:var(--pink-dark);margin:18px 0 10px}
   .hof-group:first-child{margin-top:4px}
@@ -470,10 +477,16 @@
 <!-- HALL OF FAME MODAL -->
 <div class="modal" id="hofModal">
   <div class="modal-card">
-    <div class="modal-head">
-      <span style="font-size:22px">🏆</span>
-      <span class="t">명예의 전당 · 지난 대회 수상작</span>
-      <button class="x" id="hofClose" aria-label="닫기">×</button>
+    <div class="modal-top">
+      <div class="modal-head">
+        <span style="font-size:22px">🏆</span>
+        <span class="t">명예의 전당 · 지난 대회 수상작</span>
+        <button class="x" id="hofClose" aria-label="닫기">×</button>
+      </div>
+      <div class="hof-tabs" id="hofTabs">
+        <button type="button" class="hof-tab on" data-cat="웹툰">🎨 웹툰</button>
+        <button type="button" class="hof-tab" data-cat="웹소설">📖 웹소설</button>
+      </div>
     </div>
     <div class="modal-body" id="hofList"></div>
   </div>
@@ -993,21 +1006,33 @@ var HOF=[
   ]}
 ];
 (function(){
-  var html='';
+  var sec={'웹툰':'','웹소설':''};
   HOF.forEach(function(grp){
-    html+='<div class="hof-group">'+grp.g+'</div>';
-    html+='<div class="hof-items">';
+    var cat=grp.g.indexOf('웹소설')===0?'웹소설':'웹툰';
+    var h='<div class="hof-group">'+grp.g+'</div><div class="hof-items">';
     grp.list.forEach(function(it){
-      html+='<div class="hof-item">'+
+      h+='<div class="hof-item">'+
         '<div class="meta"><div class="nm">'+maskName(it.n)+'</div><div class="sc">'+it.s+'</div></div>'+
         '<a class="go" href="'+it.url+'" target="_blank" rel="noopener">작품 보기 →</a></div>';
     });
-    html+='</div>';
+    h+='</div>';
+    sec[cat]+=h;
   });
-  document.getElementById('hofList').innerHTML=html;
+  document.getElementById('hofList').innerHTML=
+    '<div class="hof-sec" data-cat="웹툰">'+sec['웹툰']+'</div>'+
+    '<div class="hof-sec" data-cat="웹소설" style="display:none">'+sec['웹소설']+'</div>';
 })();
 var hofModal=document.getElementById('hofModal');
-document.getElementById('hofBtn').addEventListener('click',function(){hofModal.classList.add('open')});
+/* 탭 전환: 웹툰/웹소설 */
+function hofShowTab(cat){
+  document.querySelectorAll('#hofTabs .hof-tab').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-cat')===cat)});
+  document.querySelectorAll('#hofList .hof-sec').forEach(function(s){s.style.display=s.getAttribute('data-cat')===cat?'':'none'});
+  hofModal.scrollTop=0;
+}
+document.querySelectorAll('#hofTabs .hof-tab').forEach(function(t){
+  t.addEventListener('click',function(){hofShowTab(t.getAttribute('data-cat'))});
+});
+document.getElementById('hofBtn').addEventListener('click',function(){hofShowTab('웹툰');hofModal.classList.add('open')});
 document.getElementById('hofClose').addEventListener('click',function(){hofModal.classList.remove('open')});
 hofModal.addEventListener('click',function(e){if(e.target===hofModal)hofModal.classList.remove('open')});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')hofModal.classList.remove('open')});
