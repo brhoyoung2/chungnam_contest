@@ -301,17 +301,18 @@
     border:1px solid var(--pink-line);background:var(--pink-soft);color:var(--pink-dark);
     padding:3px 11px;border-radius:999px;transition:.15s;line-height:1.4}
   .howto:hover{background:var(--pink);color:#fff;border-color:var(--pink)}
-  .guide-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  #guideModal .modal-card{max-width:1060px}
+  .guide-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
   @media(max-width:680px){.guide-steps{grid-template-columns:1fr}}
-  .guide-step{border:1px solid var(--pink-line);border-radius:16px;padding:16px;background:var(--white);
+  .guide-step{border:1px solid var(--pink-line);border-radius:16px;padding:18px;background:var(--white);
     box-shadow:var(--shadow-sm)}
-  .guide-step .gnum{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
-    border-radius:50%;background:var(--pink);color:#fff;font-weight:800;font-size:13px;margin-bottom:10px}
-  .guide-step .gt{font-weight:800;font-size:14.5px;margin-bottom:6px;letter-spacing:-.01em}
-  .guide-step .gd{font-size:13px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5}
-  .guide-step .gimg{position:relative;width:100%;aspect-ratio:4/3;border-radius:12px;overflow:hidden;
+  .guide-step .gnum{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;
+    border-radius:50%;background:var(--pink);color:#fff;font-weight:800;font-size:14px;margin-bottom:11px}
+  .guide-step .gt{font-weight:800;font-size:15.5px;margin-bottom:6px;letter-spacing:-.01em}
+  .guide-step .gd{font-size:13.5px;color:var(--ink-soft);margin-bottom:14px;line-height:1.55}
+  .guide-step .gimg{position:relative;width:100%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;
     border:1px solid var(--pink-line);background:#FAF9FB;display:flex;align-items:center;justify-content:center}
-  .guide-step .gimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .guide-step .gimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
   .guide-step .gimg .ph{font-size:12px;color:var(--ink-soft);font-weight:600}
 
   /* ── MODAL ── */
@@ -1073,9 +1074,9 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')hofModal.cla
 /* 이미지는 추후 image/ 폴더에 넣으면 자동 표시됩니다. (없으면 '이미지 준비 중' 표시) */
 var GUIDES={
   board:{title:'🔗 투닝 보드 링크 제출 방법', steps:[
-    {t:'작품을 투닝 보드에 정리', d:'완성한 작품을 투닝 보드로 옮겨 한 페이지에 정리합니다.', img:'image/guide-board-1.png'},
-    {t:'공유 → 링크 복사', d:'보드 우측 상단의 「공유」 버튼을 눌러 작품 링크를 복사합니다.', img:'image/guide-board-2.png'},
-    {t:'접수 폼에 붙여넣기', d:'복사한 링크를 「투닝 보드 작품 링크」 칸에 붙여넣어 제출합니다.', img:'image/guide-board-3.png'}
+    {t:'작품을 투닝 보드에 정리', d:'완성한 작품을 투닝 보드로 옮겨 한 페이지에 정리합니다.', img:'image/001.jpg'},
+    {t:'공유 → 링크 복사', d:'보드 우측 상단의 「공유」 버튼을 눌러 작품 링크를 복사합니다.', img:'image/002.jpg'},
+    {t:'접수 폼에 붙여넣기', d:'복사한 링크를 「투닝 보드 작품 링크」 칸에 붙여넣어 제출합니다.', img:'image/003.jpg'}
   ]},
   pdf:{title:'📄 작품 PDF 제출 방법', steps:[
     {t:'작품 열기', d:'제출할 웹툰 작품을 투닝에서 엽니다.', img:'image/guide-pdf-1.png'},
