@@ -658,7 +658,22 @@
 <!-- CHATBOT -->
 <button class="chat-fab" id="chatFab" aria-label="문의 챗봇 열기">
   <span class="ping"></span>
-  <svg viewBox="0 0 24 24"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.4 1.3 4.5 3.4 6L4.5 21l4.3-2.3c1 .2 2.1.3 3.2.3 5.5 0 10-3.6 10-8s-4.5-8-10-8z"/></svg>
+  <svg viewBox="0 0 512 512">
+    <!-- 안테나 -->
+    <circle cx="118" cy="92" r="34"/>
+    <rect x="138" y="104" width="26" height="150" rx="13" transform="rotate(-32 151 179)"/>
+    <circle cx="394" cy="92" r="34"/>
+    <rect x="348" y="104" width="26" height="150" rx="13" transform="rotate(32 361 179)"/>
+    <!-- 양쪽 귀 -->
+    <rect x="36" y="250" width="70" height="140" rx="22"/>
+    <rect x="406" y="250" width="70" height="140" rx="22"/>
+    <!-- 머리 -->
+    <path fill-rule="evenodd" clip-rule="evenodd"
+      d="M256 196c-112 0-176 64-176 152 0 50 22 90 64 116 14 9 30 14 47 14h130c17 0 33-5 47-14 42-26 64-66 64-116 0-88-64-152-176-152zm0 48c83 0 124 44 124 104 0 33-13 58-40 75-7 5-15 7-23 7H195c-8 0-16-2-23-7-27-17-40-42-40-75 0-60 41-104 124-104z"/>
+    <!-- 두 눈 -->
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M192 312c-31 0-56 25-56 56s25 56 56 56 56-25 56-56-25-56-56-56zm0 38a18 18 0 100 36 18 18 0 000-36z"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M320 312c-31 0-56 25-56 56s25 56 56 56 56-25 56-56-25-56-56-56zm0 38a18 18 0 100 36 18 18 0 000-36z"/>
+  </svg>
 </button>
 
 <div class="chat-panel" id="chatPanel">
