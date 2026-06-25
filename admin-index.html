@@ -78,6 +78,49 @@
   .dlg{padding:24px}
   .dlg h3{font-size:17px;margin-bottom:6px}.dlg p{font-size:13px;color:var(--ink-soft);margin-bottom:14px}
   .dlg .row{display:flex;gap:8px;margin-top:14px}
+  /* VIEW TOGGLE */
+  .seg-toggle{display:flex;gap:8px;margin:4px 0 14px}
+  .seg-btn{font-family:inherit;font-weight:800;font-size:13.5px;cursor:pointer;border:1px solid var(--line);
+    background:#fff;color:var(--ink-soft);padding:9px 16px;border-radius:10px;transition:.13s}
+  .seg-btn:hover{border-color:var(--pink);color:var(--pink)}
+  .seg-btn.on{background:var(--pink);color:#fff;border-color:var(--pink)}
+  /* LIST VIEW */
+  .lrow{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:13px 16px;margin-bottom:9px;cursor:pointer;transition:.12s}
+  .lrow:hover{border-color:var(--pink);box-shadow:0 8px 20px -16px rgba(0,0,0,.35);transform:translateY(-1px)}
+  .lcat{flex-shrink:0;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px}
+  .lcat.wt{background:#FFEDF3;color:var(--pink-dark)}.lcat.wn{background:#EAefff;color:var(--blue)}
+  .lmain{flex:1;min-width:0}
+  .lname{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .lkey{font-family:monospace;font-size:11px;color:var(--ink-soft);font-weight:700}
+  .lsub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lmeta{flex-shrink:0;text-align:right;display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+  .lwhen{font-size:11.5px;color:var(--ink-soft)}
+  .lbadge{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .lbadge.none{background:#F0EEF3;color:var(--ink-soft)}
+  .lbadge.done{background:#F3EFFF;color:#5B2BD6}
+  .lgo{flex-shrink:0;color:var(--pink);font-weight:800;font-size:22px;line-height:1}
+  @media(max-width:680px){.lwhen{display:none}.lgo{display:none}.lsub{white-space:normal}}
+  /* DETAIL */
+  #detailCard .card{max-width:760px}
+  /* MAP */
+  .map-wrap{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;
+    box-shadow:0 6px 18px -16px rgba(0,0,0,.25)}
+  .map-title{font-weight:800;font-size:14px;margin-bottom:8px}
+  #mapSvg svg{width:100%;height:auto;display:block;max-height:540px}
+  .mnode{cursor:pointer}
+  .mnode:hover .mdot{filter:brightness(.93)}
+  .mlabel{font:600 12px Pretendard,sans-serif;fill:var(--ink-soft)}
+  .mname-on{font:800 12px Pretendard,sans-serif;fill:var(--ink)}
+  .mcount{font:800 13px Pretendard,sans-serif;fill:#fff;pointer-events:none}
+  .rchips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
+  .rchip{font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--pink-line);
+    background:#fff;color:var(--ink);padding:7px 13px;border-radius:999px;transition:.13s}
+  .rchip:hover{border-color:var(--pink);color:var(--pink)}
+  .rchip.on{background:var(--pink);color:#fff;border-color:var(--pink)}
+  .rchip b{color:inherit;margin-left:2px}
+  .rp-head{font-weight:800;font-size:15px;margin:6px 2px 4px}
+  .rl-head{font-weight:800;font-size:14.5px;margin:16px 2px 10px}.rl-head b{color:var(--pink)}
 </style>
 </head>
 <body>
@@ -110,7 +153,31 @@
       <button class="btn btn-p" id="judgeAll">⚡ 미심사 전체 AI 심사</button>
       <button class="btn" id="reload">↻ 새로고침</button>
     </div>
-    <div class="grid" id="list"></div>
+
+    <div class="seg-toggle" id="viewToggle">
+      <button class="seg-btn on" data-view="list">📋 접수자 리스트</button>
+      <button class="seg-btn" data-view="map">🗺️ 지역 지도</button>
+    </div>
+
+    <!-- 리스트 뷰 -->
+    <div id="listView">
+      <div id="list" style="padding-bottom:50px"></div>
+    </div>
+
+    <!-- 지역 지도 뷰 -->
+    <div id="mapView" style="display:none;padding-bottom:50px">
+      <div class="map-wrap">
+        <div class="map-title">📍 충청남도 접수 분포 <span class="muted" style="font-weight:500">· 지역(원)을 클릭하면 접수자가 표시됩니다</span></div>
+        <div id="mapSvg"></div>
+      </div>
+      <div id="regionPanel"></div>
+    </div>
+
+    <!-- 상세 뷰 -->
+    <div id="detailView" style="display:none;padding-bottom:50px">
+      <button class="btn" id="backBtn" style="margin:16px 0 10px">← 목록으로</button>
+      <div id="detailCard"></div>
+    </div>
   </div>
 </div>
 
@@ -169,23 +236,123 @@ document.getElementById('keySave').addEventListener('click',function(){localStor
 document.getElementById('keyClear').addEventListener('click',function(){localStorage.removeItem('xai_key');refreshKeyChip();keyDlg.close()});
 
 /* ── 검색 ── */
-document.getElementById('search').addEventListener('input',render);
+document.getElementById('search').addEventListener('input',function(){showView('list');renderList();});
 
-/* ── 렌더 ── */
-function render(){
-  refreshKeyChip();
+/* ── 뷰 전환 ── */
+function showView(v){
+  document.getElementById('listView').style.display = v==='list'?'block':'none';
+  document.getElementById('mapView').style.display  = v==='map'?'block':'none';
+  document.getElementById('detailView').style.display = v==='detail'?'block':'none';
+  document.getElementById('viewToggle').style.display = v==='detail'?'none':'flex';
+  document.querySelector('.bar').style.display = v==='detail'?'none':'flex';
+  if(v!=='detail'){
+    document.querySelectorAll('#viewToggle .seg-btn').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-view')===v)});
+  }
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('#viewToggle .seg-btn').forEach(function(b){
+  b.addEventListener('click',function(){var v=b.getAttribute('data-view');showView(v);if(v==='map')renderMap();else renderList();});
+});
+document.getElementById('backBtn').addEventListener('click',function(){showView('list');renderList();});
+
+/* ── 렌더(전체) ── */
+function render(){ refreshKeyChip(); document.getElementById('cnt').textContent=DATA.length; renderList(); renderMap(); }
+
+function filteredRows(){
   var q=document.getElementById('search').value.trim().toLowerCase();
-  var rows=DATA.filter(function(r){
+  return DATA.filter(function(r){
     if(!q)return true;
     return [r.name,r.school,r.tooning_account,r.category,r.submit_key].join(' ').toLowerCase().indexOf(q)>-1;
   });
-  document.getElementById('cnt').textContent=DATA.length;
-  var html=rows.map(cardHTML).join('');
-  document.getElementById('list').innerHTML=html||'<div class="muted" style="padding:20px">표시할 접수가 없습니다.</div>';
-  rows.forEach(function(r){
-    var b=document.getElementById('judge_'+r.id);
-    if(b)b.addEventListener('click',function(){judgeOne(r.id)});
+}
+/* ── 리스트 뷰 ── */
+function listRowHTML(r){
+  var isWt=r.category==='웹툰';
+  var when=new Date(r.updated_at||r.created_at).toLocaleString('ko-KR');
+  var rv=(r.extra||{}).ai_review, badge;
+  if(rv){
+    var keys=['주제적합성','창의성','완성도','표현력'];
+    var total=keys.reduce(function(a,k){return a+(Number(rv[k])||0)},0);
+    var rec=(rv['추천']===true||rv['추천']==='추천')?' · 추천':((rv['추천']===false||rv['추천']==='비추천')?' · 비추천':'');
+    badge='<span class="lbadge done">AI '+total+'/40'+rec+'</span>';
+  }else{ badge='<span class="lbadge none">미심사</span>'; }
+  return '<div class="lrow" data-id="'+esc(r.id)+'">'+
+    '<span class="lcat '+(isWt?'wt':'wn')+'">'+esc(r.category)+'</span>'+
+    '<div class="lmain"><div class="lname">'+esc(r.name)+' <span class="lkey">'+esc(r.submit_key||'')+'</span></div>'+
+      '<div class="lsub">🏫 '+esc(r.school)+' · '+esc(r.grade)+'　·　👤 '+esc(r.tooning_account)+'</div></div>'+
+    '<div class="lmeta"><span class="lwhen">'+esc(when)+'</span>'+badge+'</div>'+
+    '<span class="lgo">›</span></div>';
+}
+function bindRows(container){
+  container.querySelectorAll('.lrow').forEach(function(el){
+    el.addEventListener('click',function(){showDetail(el.getAttribute('data-id'))});
   });
+}
+function renderList(){
+  var rows=filteredRows();
+  var el=document.getElementById('list');
+  el.innerHTML=rows.map(listRowHTML).join('')||'<div class="muted" style="padding:20px">표시할 접수가 없습니다.</div>';
+  bindRows(el);
+}
+/* ── 상세 뷰 ── */
+function showDetail(id){
+  var r=DATA.find(function(x){return String(x.id)===String(id)}); if(!r)return;
+  document.getElementById('detailCard').innerHTML=cardHTML(r);
+  var b=document.getElementById('judge_'+r.id); if(b)b.addEventListener('click',function(){judgeOne(r.id)});
+  showView('detail');
+}
+/* ── 지역 지도 뷰 (충청남도 SVG) ── */
+var REGIONS=[
+  {n:'천안',x:398,y:88},{n:'아산',x:300,y:80},{n:'당진',x:198,y:66},{n:'서산',x:118,y:104},
+  {n:'태안',x:60,y:154},{n:'예산',x:214,y:158},{n:'홍성',x:148,y:212},{n:'청양',x:252,y:236},
+  {n:'공주',x:372,y:226},{n:'보령',x:136,y:300},{n:'부여',x:268,y:322},{n:'서천',x:184,y:392},
+  {n:'논산',x:360,y:322},{n:'계룡',x:432,y:288},{n:'금산',x:502,y:330}
+];
+var MAP_BUCKETS={};
+function regionOf(school){
+  var s=String(school||'');
+  for(var i=0;i<REGIONS.length;i++){ if(s.indexOf(REGIONS[i].n)>-1) return REGIONS[i].n; }
+  return '기타';
+}
+function chipsHTML(buckets){
+  var names=REGIONS.map(function(r){return r.n}).concat(['기타']);
+  var chips=names.filter(function(n){return (buckets[n]||[]).length>0}).map(function(n){
+    return '<button class="rchip" data-region="'+esc(n)+'">'+esc(n)+' <b>'+buckets[n].length+'</b></button>';
+  }).join('');
+  return '<div class="rchips">'+(chips||'<span class="muted">접수 없음</span>')+'</div>';
+}
+function renderMap(){
+  var buckets={}; REGIONS.forEach(function(r){buckets[r.n]=[]}); buckets['기타']=[];
+  DATA.forEach(function(r){ (buckets[regionOf(r.school)]||buckets['기타']).push(r); });
+  MAP_BUCKETS=buckets;
+  var W=560,H=440, svg='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  REGIONS.forEach(function(rg){
+    var c=buckets[rg.n].length, on=c>0, r=on?(14+Math.min(c,10)*2):6;
+    svg+='<g class="mnode" data-region="'+rg.n+'">'+
+      '<circle class="mdot" cx="'+rg.x+'" cy="'+rg.y+'" r="'+r+'" fill="'+(on?'#FF2778':'#EBE8EE')+'" stroke="'+(on?'#D6135C':'#D9D5DE')+'" stroke-width="'+(on?2:1)+'"/>'+
+      (on?'<text class="mcount" x="'+rg.x+'" y="'+(rg.y+4)+'" text-anchor="middle">'+c+'</text>':'')+
+      '<text class="'+(on?'mname-on':'mlabel')+'" x="'+rg.x+'" y="'+(rg.y+r+14)+'" text-anchor="middle">'+rg.n+'</text>'+
+    '</g>';
+  });
+  svg+='</svg>';
+  document.getElementById('mapSvg').innerHTML=svg;
+  document.querySelectorAll('#mapSvg .mnode').forEach(function(g){
+    g.addEventListener('click',function(){selectRegion(g.getAttribute('data-region'))});
+  });
+  var panel=document.getElementById('regionPanel');
+  panel.innerHTML='<div class="rp-head">지역별 접수</div>'+chipsHTML(buckets)+'<div id="regionList"></div>';
+  panel.querySelectorAll('.rchip').forEach(function(c){
+    c.addEventListener('click',function(){selectRegion(c.getAttribute('data-region'))});
+  });
+}
+function selectRegion(name){
+  var list=(MAP_BUCKETS[name]||[]).slice();
+  document.querySelectorAll('#regionPanel .rchip').forEach(function(c){c.classList.toggle('on',c.getAttribute('data-region')===name)});
+  var rl=document.getElementById('regionList');
+  if(!list.length){rl.innerHTML='<div class="muted" style="padding:14px 2px">접수가 없습니다.</div>';return;}
+  rl.innerHTML='<div class="rl-head">📍 '+esc(name)+' <b>'+list.length+'명</b></div>'+list.map(listRowHTML).join('');
+  bindRows(rl);
+  rl.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function cardHTML(r){
   var e=r.extra||{}, isWt=r.category==='웹툰';
@@ -294,7 +461,7 @@ document.getElementById('judgeAll').addEventListener('click',function(){
   if(!confirm('미심사 '+pending.length+'건을 순차로 AI 심사합니다. 진행할까요?'))return;
   var i=0;
   (function next(){
-    if(i>=pending.length){alert('전체 심사 완료');return;}
+    if(i>=pending.length){render();alert('전체 심사 완료');return;}
     var id=pending[i++].id;
     // judgeOne 은 비동기 → 완료 후 다음으로
     judgeSeq(id,next);
