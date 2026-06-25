@@ -44,7 +44,7 @@ TOKEN        = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
 ALLOWED      = [x.strip() for x in os.environ.get("TELEGRAM_ALLOWED_CHAT_ID", "").split(",") if x.strip()]
 CLAUDE_BIN   = os.environ.get("CLAUDE_BIN", "claude")
 CLAUDE_FLAGS = os.environ.get("CLAUDE_FLAGS", "--dangerously-skip-permissions")
-RUN_TIMEOUT  = int(os.environ.get("RUN_TIMEOUT", "900"))
+RUN_TIMEOUT  = int(os.environ.get("RUN_TIMEOUT", "1800"))
 CONFIG_PATH  = os.environ.get("BRIDGE_CONFIG",
                               os.path.join(os.path.expanduser("~"), ".claude-tg-bridge", "projects.json"))
 
@@ -163,13 +163,62 @@ def run_claude(prompt, cwd):
 
 def build_prompt(text, images, info):
     deploy = info.get("auto_deploy", True)
-    action = ("변경 사항을 git 으로 커밋하고 origin 의 기본 브랜치에 push 하여 배포까지 완료하세요."
-              if deploy else "변경 사항을 git 으로 커밋하세요. (push/배포는 하지 마세요.)")
+    has_cmd = bool(info.get("deploy_cmd"))
+    steps = ["1) 먼저 요청한 화면/기능이 이 저장소에 실제로 존재하는지 확인하세요. 요청이 이 프로젝트와 무관하면"
+             "(설명된 화면·기능이 코드에 없음) 아무것도 수정/커밋하지 말고, 답변 맨 앞에 정확히 '⚠️ 프로젝트 불일치'"
+             "라고 쓴 뒤 이유와 함께 맞는 프로젝트로 다시 보내달라고 한국어로 안내하세요."]
+    if deploy and has_cmd:
+        steps.append("2) 요청이 맞으면 코드를 수정하고 git 으로 커밋하세요. (push/배포는 시스템이 처리하니 직접 하지 않아도 됩니다.)")
+    elif deploy:
+        steps.append("2) 요청이 맞으면 코드를 수정하고 git 으로 커밋한 뒤 origin 기본 브랜치에 push 하세요(자동배포).")
+    else:
+        steps.append("2) 요청이 맞으면 코드를 수정하고 git 으로 커밋만 하세요(push/배포 금지).")
     note = ("\n\n첨부 이미지(이 저장소 기준 경로): " + ", ".join(images)) if images else ""
-    return ("아래는 텔레그램으로 받은 작업 지시입니다. 이 저장소에서 요청대로 코드를 수정한 뒤, "
-            + action + " 첨부 이미지를 사이트에 쓰라는 지시면 inbox/ 에서 적절한 위치로 옮겨 커밋하세요. "
-            "작업을 마치면 무엇을 했는지 한국어로 1~3줄 요약하세요." + note +
+    return ("아래는 텔레그램으로 받은 작업 지시입니다. 다음 절차로 처리하세요.\n" + "\n".join(steps) +
+            " 첨부 이미지를 사이트에 쓰라는 지시면 inbox/ 에서 적절한 위치로 옮겨 커밋하세요."
+            "\n마지막에 무엇을 했는지(또는 왜 안 했는지)를 한국어로 1~3줄 반드시 요약하세요." + note +
             "\n\n[지시]\n" + (text or "(텍스트 없음)"))
+
+
+def git_head(cwd):
+    try:
+        return subprocess.run(["git", "-C", cwd, "rev-parse", "--short", "HEAD"],
+                              capture_output=True, text=True, timeout=20).stdout.strip()
+    except Exception:
+        return ""
+
+
+def git_info(cwd):
+    def g(a):
+        try:
+            return subprocess.run(["git", "-C", cwd] + a, capture_output=True, text=True, timeout=20).stdout.strip()
+        except Exception:
+            return ""
+    last = g(["log", "-1", "--pretty=%h %s"])
+    dirty = g(["status", "--porcelain"])
+    ahead = g(["rev-list", "--count", "@{u}..HEAD"])
+    out = []
+    if last:
+        out.append("최근 커밋: " + last)
+    if dirty:
+        out.append("⚠️ 커밋 안 된 변경 있음")
+    if ahead.isdigit() and int(ahead) > 0:
+        out.append("⚠️ 아직 push 안 됨(" + ahead + "개)")
+    return "\n".join(out)
+
+
+def run_deploy(cmd, cwd):
+    try:
+        p = subprocess.run(cmd, cwd=cwd, shell=True, capture_output=True, text=True, timeout=600)
+        out = (p.stdout or "") + "\n" + (p.stderr or "")
+        urls = re.findall(r"https://[^\s\"']+", out)
+        if p.returncode == 0:
+            return "🚀 배포 완료" + ((": " + urls[-1]) if urls else "")
+        return "⚠️ 배포 실패(코드 " + str(p.returncode) + ")\n" + out.strip()[-400:]
+    except subprocess.TimeoutExpired:
+        return "⏱️ 배포 시간 초과"
+    except Exception as e:
+        return "⚠️ 배포 오류: " + str(e)
 
 
 # ── 메시지 처리 ──
@@ -255,8 +304,20 @@ def handle(msg):
 
     images = PENDING.pop(chat_id, [])
     send(chat_id, "🛠️ [" + alias + "] " + str(info.get("name", "")) + " 작업 시작…")
+    pre = git_head(cwd)
     result = run_claude(build_prompt(text, images, info), cwd)
-    send(chat_id, "✅ [" + alias + "] 완료\n\n" + result)
+    post = git_head(cwd)
+    mismatch = result.strip().startswith("⚠️ 프로젝트 불일치")
+
+    head = ("⚠️ [" + alias + "] 프로젝트 불일치" if mismatch else "✅ [" + alias + "] 완료")
+    parts = [head, "", result]
+    # 새 커밋이 생겼고 deploy_cmd 가 있으면 시스템이 배포
+    if not mismatch and info.get("deploy_cmd") and post and pre != post:
+        parts.append("\n" + run_deploy(info["deploy_cmd"], cwd))
+    gi = git_info(cwd)
+    if gi:
+        parts.append("\n— git 상태 —\n" + gi)
+    send(chat_id, "\n".join(parts))
 
 
 def main():
