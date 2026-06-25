@@ -217,7 +217,13 @@ def handle(msg):
         if not alias:
             send(chat_id, "프로젝트 '" + m_in.group(1) + "' 를 찾지 못했어요.\n\n" + projects_text(projects, chat_id)); return
         override = alias
-        text = m_in.group(2).strip()
+        text = (m_in.group(2) or "").strip()
+        # [별칭] 만 단독으로 보내면 → 그 프로젝트를 활성으로 선택
+        if not text and "photo" not in msg:
+            ACTIVE[chat_id] = alias
+            send(chat_id, "✅ 활성 프로젝트: [" + alias + "] " + str(projects[alias].get("name", "")) +
+                          "\n이제 수정사항을 보내면 여기서 실행됩니다. (또는 [" + alias + "] 수정내용 형태로 한 번에)")
+            return
 
     # 대상 프로젝트 결정
     alias = override or ACTIVE.get(chat_id)
