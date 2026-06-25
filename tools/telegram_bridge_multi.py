@@ -150,7 +150,8 @@ def find_claude():
 def run_claude(prompt, cwd):
     cmd = find_claude() + ["-p", prompt] + CLAUDE_FLAGS.split()
     try:
-        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=RUN_TIMEOUT)
+        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=RUN_TIMEOUT,
+                           encoding="utf-8", errors="replace")
         out = (p.stdout or "").strip()
         if p.returncode != 0 and p.stderr:
             out += "\n[stderr]\n" + p.stderr.strip()
@@ -183,7 +184,8 @@ def build_prompt(text, images, info):
 def git_head(cwd):
     try:
         return subprocess.run(["git", "-C", cwd, "rev-parse", "--short", "HEAD"],
-                              capture_output=True, text=True, timeout=20).stdout.strip()
+                              capture_output=True, text=True, timeout=20,
+                              encoding="utf-8", errors="replace").stdout.strip()
     except Exception:
         return ""
 
@@ -191,7 +193,8 @@ def git_head(cwd):
 def git_info(cwd):
     def g(a):
         try:
-            return subprocess.run(["git", "-C", cwd] + a, capture_output=True, text=True, timeout=20).stdout.strip()
+            return subprocess.run(["git", "-C", cwd] + a, capture_output=True, text=True, timeout=20,
+                                  encoding="utf-8", errors="replace").stdout.strip()
         except Exception:
             return ""
     last = g(["log", "-1", "--pretty=%h %s"])
@@ -209,7 +212,8 @@ def git_info(cwd):
 
 def run_deploy(cmd, cwd):
     try:
-        p = subprocess.run(cmd, cwd=cwd, shell=True, capture_output=True, text=True, timeout=600)
+        p = subprocess.run(cmd, cwd=cwd, shell=True, capture_output=True, text=True, timeout=600,
+                           encoding="utf-8", errors="replace")
         out = (p.stdout or "") + "\n" + (p.stderr or "")
         urls = re.findall(r"https://[^\s\"']+", out)
         if p.returncode == 0:
@@ -335,6 +339,7 @@ def main():
             data = tg("getUpdates", params)
             for upd in data.get("result", []):
                 offset = upd["update_id"] + 1
+                tg("getUpdates", {"offset": offset, "timeout": 0})  # 즉시 확인 → 재시작 시 같은 메시지 재실행 방지
                 msg = upd.get("message") or upd.get("edited_message")
                 if not msg:
                     continue
