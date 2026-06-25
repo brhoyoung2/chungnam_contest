@@ -14,6 +14,10 @@
 브리지는 매 메시지마다 이 파일을 다시 읽으므로 재시작이 필요 없습니다.
 """
 import os, sys, json
+try:
+    sys.stdout.reconfigure(encoding="utf-8")   # Windows cp949 콘솔에서도 이모지/한글 출력
+except Exception:
+    pass
 
 if len(sys.argv) < 2:
     print("사용법: python tools/register_project.py <별칭> \"<표시이름>\" [auto_deploy]")

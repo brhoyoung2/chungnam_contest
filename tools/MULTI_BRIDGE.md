@@ -26,7 +26,9 @@
 
 ```bash
 python - <<'PY'
-import os, json
+import os, json, sys
+try: sys.stdout.reconfigure(encoding="utf-8")   # Windows cp949 콘솔 보호
+except Exception: pass
 # ▼▼ 이 3줄만 본인 프로젝트에 맞게 수정 ▼▼
 alias = "몬스터"          # 텔레그램에서 부를 짧은 별칭
 name  = "투닝 몬스터"      # 표시 이름

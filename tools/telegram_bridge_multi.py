@@ -35,6 +35,10 @@ push(배포)까지 자동 처리하고 결과를 회신합니다.
 """
 import os, sys, time, json, re, subprocess, datetime, pathlib, shutil, glob
 import urllib.parse, urllib.request, urllib.error
+try:
+    sys.stdout.reconfigure(encoding="utf-8")   # Windows cp949 콘솔 출력 보호
+except Exception:
+    pass
 
 TOKEN        = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
 ALLOWED      = [x.strip() for x in os.environ.get("TELEGRAM_ALLOWED_CHAT_ID", "").split(",") if x.strip()]
