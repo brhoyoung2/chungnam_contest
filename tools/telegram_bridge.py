@@ -34,7 +34,7 @@
    제한하세요. --dangerously-skip-permissions 는 PC에서 파일수정·git·명령을 무인 실행하므로
    반드시 화이트리스트(chat_id) 와 함께 쓰세요.
 """
-import os, sys, time, json, subprocess, datetime, pathlib
+import os, sys, time, json, subprocess, datetime, pathlib, shutil, glob
 import urllib.parse, urllib.request, urllib.error
 
 TOKEN        = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
@@ -93,9 +93,33 @@ def download_photo(file_id):
     return os.path.relpath(dest, REPO_DIR).replace("\\", "/")
 
 
+def find_claude():
+    """claude 실행 파일을 견고하게 탐색해 실행 prefix(list) 반환.
+    Windows npm 전역설치는 claude(확장자 없음)/claude.cmd 라 subprocess가 직접 못 찾으므로
+    네이티브 claude.exe 를 우선 사용한다."""
+    p = shutil.which(CLAUDE_BIN)
+    if p and p.lower().endswith(".exe"):
+        return [p]
+    home = os.path.expanduser("~")
+    cands = [
+        os.path.join(home, "AppData", "Roaming", "npm", "node_modules",
+                     "@anthropic-ai", "claude-code", "bin", "claude.exe"),
+        os.path.join(home, ".local", "bin", "claude.exe"),
+        os.path.join(home, ".local", "bin", "claude"),
+    ]
+    cands += glob.glob(os.path.join(home, "AppData", "Roaming", "npm", "node_modules",
+                                    "@anthropic-ai", "claude-code", "bin", "claude*"))
+    for c in cands:
+        if os.path.isfile(c):
+            return [c]
+    if p and p.lower().endswith((".cmd", ".bat")):
+        return ["cmd", "/c", p]            # 폴백: 배치 래퍼는 cmd 경유
+    return [p or CLAUDE_BIN]
+
+
 def run_claude(prompt):
     """Claude Code 를 헤드리스로 실행하고 최종 출력 텍스트 반환."""
-    cmd = [CLAUDE_BIN, "-p", prompt] + CLAUDE_FLAGS.split()
+    cmd = find_claude() + ["-p", prompt] + CLAUDE_FLAGS.split()
     try:
         p = subprocess.run(cmd, cwd=REPO_DIR, capture_output=True,
                            text=True, timeout=RUN_TIMEOUT)
