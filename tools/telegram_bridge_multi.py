@@ -243,7 +243,9 @@ def handle(msg):
     low = text.lower()
     if low in ("/start", "/help", "도움말"):
         send(chat_id, "🤖 멀티 프로젝트 브리지\n\n/projects 목록\n/use <이름> 활성 전환\n/current 현재\n"
-                      "[이름] 메시지 → 이번만 해당 프로젝트에서 실행\n그 외 메시지 → 활성 프로젝트에서 실행")
+                      "/deploy 배포만 실행(코드 변경 없이)\n"
+                      "[이름] 메시지 → 이번만 해당 프로젝트에서 실행\n[이름] /deploy → 해당 프로젝트 배포\n"
+                      "그 외 메시지 → 활성 프로젝트에서 실행(수정→커밋→배포)")
         return
     if low in ("/projects", "/list", "/프로젝트", "프로젝트", "목록"):
         send(chat_id, projects_text(projects, chat_id)); return
@@ -291,6 +293,15 @@ def handle(msg):
     cwd = info.get("dir", "")
     if not cwd or not os.path.isdir(cwd):
         send(chat_id, "프로젝트 [" + alias + "] 의 경로가 올바르지 않습니다: " + str(cwd)); return
+
+    # 배포만(코드 변경 없이): /deploy
+    if text.strip().lower() in ("/deploy", "/배포", "배포만"):
+        send(chat_id, "🚀 [" + alias + "] " + str(info.get("name", "")) + " 배포 시작…")
+        cmd = info.get("deploy_cmd") or "git push"
+        out = run_deploy(cmd, cwd)
+        gi = git_info(cwd)
+        send(chat_id, "[" + alias + "] " + out + (("\n\n— git —\n" + gi) if gi else ""))
+        return
 
     # 사진: 모았다가 지시와 함께 실행
     if "photo" in msg:
