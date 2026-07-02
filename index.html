@@ -138,14 +138,21 @@
   .tag{font-size:12px;font-weight:700;background:var(--pink-soft);color:var(--pink-dark);padding:5px 11px;border-radius:999px}
 
   /* 주제 발표 안내 */
-  .notice{display:flex;gap:14px;align-items:flex-start;background:var(--white);border:1px dashed var(--pink);
-    border-radius:var(--radius);padding:18px 20px;margin-top:18px;box-shadow:var(--shadow-sm)}
-  .notice .ni{font-size:24px;line-height:1.2}
-  .notice .nt{font-weight:800;font-size:15.5px;margin-bottom:4px}
-  .notice .nt .soon{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:var(--pink);
-    border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:middle}
-  .notice .nd{font-size:13.5px;color:var(--ink-soft)}
+  .notice{display:flex;gap:18px;align-items:flex-start;background:var(--white);border:1px dashed var(--pink);
+    border-radius:var(--radius);padding:26px 28px;margin-top:18px;box-shadow:var(--shadow-sm)}
+  .notice .ni{font-size:44px;line-height:1.1}
+  .notice .nt{font-weight:800;font-size:28px;margin-bottom:10px}
+  .notice .nt .soon{display:inline-block;font-size:16px;font-weight:800;color:#fff;background:var(--pink);
+    border-radius:999px;padding:4px 14px;margin-left:10px;vertical-align:middle}
+  .notice .nd{font-size:26px;line-height:1.6;color:var(--ink-soft)}
   .notice .nd b{color:var(--pink-dark)}
+  @media(max-width:560px){
+    .notice{padding:20px 18px;gap:12px}
+    .notice .ni{font-size:34px}
+    .notice .nt{font-size:22px}
+    .notice .nd{font-size:19px}
+    .notice .nt .soon{font-size:13px}
+  }
 
   .tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
   .tool{flex:1;min-width:120px;text-align:center;background:var(--white);border:1px solid var(--pink-line);
