@@ -6,3 +6,6 @@ logo(충남교육청).jpg
 
 # 텔레그램 브리지가 폰에서 받은 원본 이미지(필요 시 Claude가 image/로 옮겨 커밋)
 inbox/
+
+# 파이썬 캐시
+__pycache__/
