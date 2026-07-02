@@ -47,6 +47,13 @@ CLAUDE_FLAGS = os.environ.get("CLAUDE_FLAGS", "--dangerously-skip-permissions")
 RUN_TIMEOUT  = int(os.environ.get("RUN_TIMEOUT", "1800"))
 CONFIG_PATH  = os.environ.get("BRIDGE_CONFIG",
                               os.path.join(os.path.expanduser("~"), ".claude-tg-bridge", "projects.json"))
+# 일괄 승인(bulk-approve Edge Function) 연동
+APPROVE_URL    = os.environ.get("BULK_APPROVE_URL",
+                                "https://mllbsqnrvhvnqvxkpxof.supabase.co/functions/v1/bulk-approve")
+APPROVE_SECRET = os.environ.get("BRIDGE_APPROVE_SECRET", "")
+SUPA_ANON      = os.environ.get("SUPABASE_ANON_KEY",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sbGJzcW5ydmh2bnF2eGtweG9mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyOTQ4MDUsImV4cCI6MjA5NTg3MDgwNX0.X4vB-JwtbrQOUg_It5dSuvTrIWOOFfg7ThIiU8FKhjI")
+PENDING_APPROVE = {}  # chat_id -> service (승인 확정 대기)
 
 API = "https://api.telegram.org/bot" + TOKEN
 ACTIVE = {}          # chat_id -> alias (활성 프로젝트)
@@ -225,6 +232,22 @@ def run_deploy(cmd, cwd):
         return "⚠️ 배포 오류: " + str(e)
 
 
+def call_bulk_approve(service, dry):
+    """bulk-approve Edge Function 호출. 반환: (ok, dict|error_str)"""
+    if not APPROVE_SECRET:
+        return False, "BRIDGE_APPROVE_SECRET 미설정(브리지 환경변수)."
+    body = json.dumps({"secret": APPROVE_SECRET, "service": service, "dryRun": bool(dry)}).encode()
+    req = urllib.request.Request(APPROVE_URL, data=body, method="POST", headers={
+        "Content-Type": "application/json", "apikey": SUPA_ANON, "Authorization": "Bearer " + SUPA_ANON})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            return True, json.load(r)
+    except urllib.error.HTTPError as e:
+        return False, "HTTP %s %s" % (e.code, e.read().decode()[:200])
+    except Exception as e:
+        return False, str(e)
+
+
 # ── 메시지 처리 ──
 def handle(msg):
     chat_id = str(msg.get("chat", {}).get("id", ""))
@@ -293,6 +316,33 @@ def handle(msg):
     cwd = info.get("dir", "")
     if not cwd or not os.path.isdir(cwd):
         send(chat_id, "프로젝트 [" + alias + "] 의 경로가 올바르지 않습니다: " + str(cwd)); return
+
+    # 일괄 승인: [프로젝트] 승인 → 대기 건수 안내(확정 대기), [프로젝트] 승인확정 → 실제 승인+메일
+    tclean = text.strip()
+    svc = info.get("approve_service")
+    if tclean in ("승인", "승인해줘", "승인해주세요", "승인확정"):
+        if not svc:
+            send(chat_id, "[" + alias + "] 은 승인 기능이 연결돼 있지 않습니다."); return
+        if tclean == "승인확정":
+            if PENDING_APPROVE.get(chat_id) != svc:
+                send(chat_id, "먼저 '[" + alias + "] 승인' 으로 대기 건수를 확인한 뒤 '승인확정' 해주세요."); return
+            PENDING_APPROVE.pop(chat_id, None)
+            send(chat_id, "⏳ [" + alias + "] 일괄 승인 + 메일 발송 중…")
+            ok, res = call_bulk_approve(svc, dry=False)
+            if not ok:
+                send(chat_id, "⚠️ 승인 실패: " + str(res)); return
+            send(chat_id, "✅ [" + alias + "] 승인 %s명 · 메일 %s건 발송 완료" % (res.get("approved", "?"), res.get("mailed", "?")))
+            return
+        else:
+            ok, res = call_bulk_approve(svc, dry=True)
+            if not ok:
+                send(chat_id, "⚠️ 조회 실패: " + str(res)); return
+            n = res.get("pending", 0)
+            if not n:
+                send(chat_id, "[" + alias + "] 대기 중인 신청이 없습니다."); return
+            PENDING_APPROVE[chat_id] = svc
+            send(chat_id, "📋 [" + alias + "] 대기 신청 %s명.\n승인 + 안내메일을 보내려면 '[%s] 승인확정' 을 보내주세요." % (n, alias))
+            return
 
     # 배포만(코드 변경 없이): /deploy
     if text.strip().lower() in ("/deploy", "/배포", "배포만"):
