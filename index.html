@@ -473,7 +473,11 @@
     </div>
 
     <div style="margin-top:34px">
-      <h2>제작 도구 — 투닝 4종</h2>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px">
+        <h2 style="margin-bottom:0">제작 도구 — 투닝 4종</h2>
+        <span style="flex:1"></span>
+        <a class="btn btn-ghost" href="https://docs.google.com/presentation/d/1CRubnIhdKGVrc-X-4UWLLm8hjKeJdrES4R5FZ2n6Iws/edit?usp=sharing" target="_blank" rel="noopener" style="font-size:14px">📘 투닝 기본 사용 설명서</a>
+      </div>
       <div class="tools">
         <a class="tool" href="https://tooning.io/gpt-information" target="_blank" rel="noopener"><div class="logo-box"><img class="tlogo" src="image/tool-character.svg" alt="투닝 캐릭터"></div><div class="n">투닝 캐릭터</div><div class="d">AI로 캐릭터·이야기를 만드는<br>웹소설 작가 도구</div></a>
         <a class="tool" href="https://tooning.io/editor-information" target="_blank" rel="noopener"><div class="logo-box"><img class="tlogo" src="image/tool-editor.svg" alt="투닝 에디터"></div><div class="n">투닝 에디터</div><div class="d">드래그로 완성하는<br>웹툰 제작 도구</div></a>
@@ -570,8 +574,12 @@
             <option>고 1학년</option><option>고 2학년</option><option>고 3학년</option></select>
         </div>
         <div class="field"><label>지도교사 이메일 <span class="req">*</span></label>
-          <input type="email" id="f_email" placeholder="teacher@school.kr">
-          <p class="hint">전체 공지는 지도교사 이메일로 발송됩니다.</p>
+          <div class="acct-row">
+            <input type="email" id="f_email" placeholder="teacher@school.kr">
+            <button type="button" class="acct-check" id="emailCheck">확인</button>
+          </div>
+          <div class="acct-result" id="emailResult"></div>
+          <p class="hint">접수 완료 안내는 지도교사 이메일로 발송됩니다. 「확인」으로 명단과 대조해 보세요.</p>
         </div>
       </div>
       <div class="field">
@@ -986,6 +994,41 @@ document.getElementById('submitBtn').addEventListener('click',function(){
   input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();check();}});
   input.addEventListener('input',function(){out.style.display='none';out.className='acct-result';
     btn.classList.remove('ok');btn.textContent='계정 확인';input.classList.remove('ok');});
+})();
+
+/* ── 지도교사 이메일 확인 (명단 대조 · 서버 RPC) ── */
+(function(){
+  var input=document.getElementById('f_email');
+  var btn=document.getElementById('emailCheck');
+  var out=document.getElementById('emailResult');
+  if(!input||!btn||!out)return;
+  function show(level,msg,fix){
+    out.className='acct-result '+level; out.textContent=msg;
+    if(fix){
+      var b=document.createElement('button');b.type='button';b.className='fixbtn';b.textContent='이 이메일로 채우기';
+      b.addEventListener('click',function(){input.value=fix;check();input.focus();});
+      out.appendChild(document.createTextNode(' '));out.appendChild(b);
+    }
+    var ok=(level==='ok');
+    btn.classList.toggle('ok',ok); btn.textContent=ok?'✓ 확인됨':'확인'; input.classList.toggle('ok',ok);
+  }
+  function check(){
+    var v=(input.value||'').trim().toLowerCase();
+    if(!v){show('warn','지도교사 이메일을 입력한 뒤 「확인」을 눌러 주세요.');return;}
+    if(!sb){show('warn','확인 서버에 연결할 수 없어요. 그대로 접수하셔도 됩니다.');return;}
+    btn.disabled=true; btn.textContent='확인 중…';
+    sb.rpc('충남콘테스트_교사확인',{p_email:v}).then(function(res){
+      btn.disabled=false;
+      if(res.error){show('warn','확인 중 오류가 발생했어요. 그대로 접수하셔도 됩니다.');return;}
+      var r=(res.data&&res.data[0])||{status:'none'};
+      if(r.status==='ok') show('ok','✅ 확인되었습니다! 명단의 지도교사 이메일이에요.');
+      else if(r.status==='typo') show('warn','⚠️ 오타로 보여요. 혹시 이 이메일 아닌가요? → '+r.suggestion, r.suggestion);
+      else show('bad','✗ 명단에서 찾지 못했어요. 지도교사 이메일 철자를 다시 확인해 주세요. (그대로 접수는 가능합니다)');
+    }).catch(function(){btn.disabled=false;show('warn','확인 중 오류가 발생했어요. 그대로 접수하셔도 됩니다.');});
+  }
+  btn.addEventListener('click',check);
+  input.addEventListener('input',function(){out.style.display='none';out.className='acct-result';
+    btn.classList.remove('ok');btn.textContent='확인';input.classList.remove('ok');});
 })();
 
 /* ── 챗봇 ── */
