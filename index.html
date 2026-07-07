@@ -882,6 +882,16 @@ document.getElementById('submitBtn').addEventListener('click',function(){
     }
   }
 
+  /* 지도교사 이메일 확인 안내: 미확인이면 확인 실행 + 토스트(1회 경고 후 진행 허용) */
+  var _ec=document.getElementById('emailCheck');
+  if(_ec && !_ec.classList.contains('ok') && !window._teacherNudged){
+    _ec.click();  /* 비동기 확인 실행 → 인라인 결과 표시(초록/빨강) */
+    window._teacherNudged=true;
+    showToast('지도교사 이메일을 「확인」으로 확인해 주세요. 명단에 없으면 철자를 확인하고, 그대로 진행하려면 한 번 더 제출해 주세요.','warn');
+    document.getElementById('f_email').scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
   var category=cat.value;
   var link, pdfFile, aiImgs=[], desc='', ai='', episodes=[];
 
@@ -1074,7 +1084,7 @@ document.getElementById('submitBtn').addEventListener('click',function(){
   }
   btn.addEventListener('click',check);
   input.addEventListener('input',function(){out.style.display='none';out.className='acct-result';
-    btn.classList.remove('ok');btn.textContent='확인';input.classList.remove('ok');});
+    btn.classList.remove('ok');btn.textContent='확인';input.classList.remove('ok');window._teacherNudged=false;});
 })();
 
 /* ── 챗봇 ── */
