@@ -129,6 +129,8 @@
   table.tbl tbody tr{cursor:pointer}
   table.tbl tbody tr:hover td{background:#FFF6FA}
   table.tbl a{color:var(--pink);font-weight:700}
+  #mailDlg{max-width:640px}
+  #mailDlg textarea:focus,#mailDlg input:focus{outline:none;border-color:var(--pink);box-shadow:0 0 0 4px var(--pink-soft)}
 </style>
 </head>
 <body>
@@ -149,6 +151,7 @@
     <div class="t">접수 관리자 · <b>AI 심사</b></div>
     <div class="sp"></div>
     <span class="keychip off" id="keyChip">xAI 키 미설정</span>
+    <button class="btn" id="mailBtn">✉️ 접수메일 양식</button>
     <button class="btn" id="keyBtn">🔑 AI 키 설정</button>
     <button class="btn" id="logoutBtn">로그아웃</button>
   </div></header>
@@ -204,6 +207,26 @@
   </div>
 </div>
 
+<!-- 접수 완료 메일 양식 DIALOG -->
+<dialog id="mailDlg"><div class="dlg" style="max-width:none;width:100%">
+  <h3>✉️ 접수 완료 자동메일 양식</h3>
+  <p>학생 접수 시 <b>지도교사 이메일</b>로 자동 발송되는 메일입니다(참조: leo@tooning.io). 저장하면 이후 발송부터 적용됩니다.</p>
+  <label style="margin-top:6px">제목</label>
+  <input type="text" id="mailSubject" placeholder="[AI 도구 활용 디지털 콘텐츠 창작] 접수완료">
+  <label style="margin-top:12px">내용</label>
+  <textarea id="mailBody" rows="14" style="width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1.5px solid var(--pink-line);border-radius:10px;line-height:1.6;resize:vertical"></textarea>
+  <div class="muted" style="font-size:12px;margin-top:8px;line-height:1.6">
+    치환 항목(입력하면 자동으로 채워짐):
+    <b>{이름}</b> · <b>{학교}</b> · <b>{학년}</b> · <b>{부문}</b> · <b>{접수키}</b> · <b>{작품링크}</b> · <b>{최종접수}</b>
+    <br>· {작품링크}는 클릭 가능한 링크로 변환됩니다. · 지도교사 성함은 데이터에 없어 "선생님"으로 표기됩니다.
+  </div>
+  <div id="mailMsg" class="muted" style="margin-top:10px"></div>
+  <div class="row">
+    <button class="btn btn-p" id="mailSave" style="flex:1;justify-content:center">저장</button>
+    <button class="btn" id="mailClose">닫기</button>
+  </div>
+</div></dialog>
+
 <!-- xAI KEY DIALOG -->
 <dialog id="keyDlg"><div class="dlg">
   <h3>🔑 xAI(Grok) API 키</h3>
@@ -257,6 +280,35 @@ document.getElementById('keyBtn').addEventListener('click',function(){document.g
 document.getElementById('keyClose').addEventListener('click',function(){keyDlg.close()});
 document.getElementById('keySave').addEventListener('click',function(){localStorage.setItem('xai_key',cleanKey(document.getElementById('keyInput').value));refreshKeyChip();keyDlg.close()});
 document.getElementById('keyClear').addEventListener('click',function(){localStorage.removeItem('xai_key');refreshKeyChip();keyDlg.close()});
+
+/* ── 접수 완료 메일 양식 ── */
+var mailDlg=document.getElementById('mailDlg');
+var MAIL_DEFAULT_SUBJECT='[AI 도구 활용 디지털 콘텐츠 창작] 접수완료';
+var MAIL_DEFAULT_BODY='안녕하세요, 선생님.\n제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2 공모전 접수를 안내드립니다.\n아래와 같이 작품이 정상적으로 접수되었습니다.\n\n• 이름: {이름}\n• 학교: {학교} ({학년})\n• 부문: {부문}\n• 접수 키: {접수키}\n• 작품 링크: {작품링크}\n• 최종 접수: {최종접수}\n\n투닝 공모전을 사랑해 주셔서 감사드립니다.\n오늘도 즐거운 하루 보내세요! 😊';
+document.getElementById('mailBtn').addEventListener('click',function(){
+  document.getElementById('mailMsg').textContent='불러오는 중…';
+  document.getElementById('mailMsg').style.color='';
+  mailDlg.showModal();
+  sb.rpc('충남콘테스트_메일템플릿',{p_pw:PW}).then(function(res){
+    var r=(res.data&&res.data[0])||{};
+    document.getElementById('mailSubject').value=r.mail_subject||MAIL_DEFAULT_SUBJECT;
+    document.getElementById('mailBody').value=(r.mail_body!=null?r.mail_body:MAIL_DEFAULT_BODY);
+    document.getElementById('mailMsg').textContent=res.error?('불러오기 실패: '+(res.error.message||res.error)+' — SQL(설정 테이블/함수) 실행이 필요할 수 있어요.'):'';
+    if(res.error)document.getElementById('mailMsg').style.color='var(--warn)';
+  });
+});
+document.getElementById('mailClose').addEventListener('click',function(){mailDlg.close()});
+document.getElementById('mailSave').addEventListener('click',function(){
+  var subj=document.getElementById('mailSubject').value.trim();
+  var body=document.getElementById('mailBody').value;
+  var msg=document.getElementById('mailMsg');
+  if(!subj){msg.style.color='var(--warn)';msg.textContent='제목을 입력해 주세요.';return;}
+  msg.style.color='';msg.textContent='저장 중…';
+  sb.rpc('충남콘테스트_메일템플릿저장',{p_pw:PW,p_subject:subj,p_body:body}).then(function(res){
+    if(res.error){msg.style.color='var(--warn)';msg.textContent='저장 실패: '+(res.error.message||res.error);return;}
+    msg.style.color='var(--ok)';msg.textContent='✓ 저장됐어요. 이후 발송부터 이 양식으로 나갑니다.';
+  });
+});
 
 /* ── 검색 ── */
 document.getElementById('search').addEventListener('input',function(){showView('list');renderList();});

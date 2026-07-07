@@ -212,12 +212,47 @@ end;
 $$;
 grant execute on function public."충남콘테스트_관리자삭제"(text,uuid) to anon;
 
--- 7) 접수 완료 자동메일 (Resend) --------------------------------
+-- 7) 접수 완료 자동메일 (Resend) — 양식은 관리자 페이지에서 편집 -----
 --    첫 접수(INSERT)·재제출(UPDATE·updated_at 변경 시)에 지도교사 메일로 발송, leo@tooning.io 참조.
 --    ⚠️ 아래 v_key 를 실제 Resend API 키(re_...)로 교체하세요. (공개 레포엔 키를 넣지 마세요)
 --    ⚠️ api.resend.com 은 Cloudflare 뒤라 User-Agent 헤더가 없으면 차단(1010)됨 → 헤더 포함.
 create extension if not exists pg_net with schema extensions;
 
+-- 7-1) 메일 양식 저장(단일 행) + 기본값
+create table if not exists public."충남콘테스트_설정" (
+  id           int primary key default 1,
+  mail_subject text,
+  mail_body    text,
+  updated_at   timestamptz default now(),
+  constraint "충남설정_singleton" check (id = 1)
+);
+alter table public."충남콘테스트_설정" enable row level security;   -- anon 직접 접근 차단(관리자 RPC로만)
+insert into public."충남콘테스트_설정"(id, mail_subject, mail_body) values (1,
+  '[AI 도구 활용 디지털 콘텐츠 창작] 접수완료',
+  E'안녕하세요, 선생님.\n제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2 공모전 접수를 안내드립니다.\n아래와 같이 작품이 정상적으로 접수되었습니다.\n\n• 이름: {이름}\n• 학교: {학교} ({학년})\n• 부문: {부문}\n• 접수 키: {접수키}\n• 작품 링크: {작품링크}\n• 최종 접수: {최종접수}\n\n투닝 공모전을 사랑해 주셔서 감사드립니다.\n오늘도 즐거운 하루 보내세요! 😊'
+) on conflict (id) do nothing;
+
+-- 7-2) 관리자 양식 조회/저장 (비밀번호 게이트)
+create or replace function public."충남콘테스트_메일템플릿"(p_pw text)
+returns table(mail_subject text, mail_body text)
+language plpgsql security definer set search_path = public as $$
+begin
+  if p_pw is distinct from '5972' then raise exception 'unauthorized'; end if;
+  return query select s.mail_subject, s.mail_body from public."충남콘테스트_설정" s where s.id = 1;
+end $$;
+grant execute on function public."충남콘테스트_메일템플릿"(text) to anon;
+
+create or replace function public."충남콘테스트_메일템플릿저장"(p_pw text, p_subject text, p_body text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if p_pw is distinct from '5972' then raise exception 'unauthorized'; end if;
+  insert into public."충남콘테스트_설정"(id, mail_subject, mail_body, updated_at)
+  values (1, p_subject, p_body, now())
+  on conflict (id) do update set mail_subject = excluded.mail_subject, mail_body = excluded.mail_body, updated_at = now();
+end $$;
+grant execute on function public."충남콘테스트_메일템플릿저장"(text,text,text) to anon;
+
+-- 7-3) 트리거 함수: 저장된 양식을 읽어 치환 후 발송
 create or replace function public."충남_접수완료메일"()
 returns trigger language plpgsql security definer set search_path = public, extensions as $$
 declare
@@ -225,27 +260,27 @@ declare
   v_new  boolean := (TG_OP = 'INSERT');
   v_when text := to_char(NEW.updated_at at time zone 'Asia/Seoul','YYYY-MM-DD HH24:MI');
   v_subj text;
+  v_body text;
   v_html text;
 begin
   if NEW.teacher_email is null or position('@' in NEW.teacher_email) = 0 then
     return NEW;
   end if;
-  v_subj := '[충남 AI 공모전] '
-         || case when v_new then '접수 완료 안내 — ' else '접수 내역 갱신 — ' end
-         || coalesce(NEW.name,'') || ' (' || coalesce(NEW.category,'') || ')';
+  select mail_subject, mail_body into v_subj, v_body from public."충남콘테스트_설정" where id = 1;
+  v_subj := coalesce(nullif(btrim(v_subj),''), '[AI 도구 활용 디지털 콘텐츠 창작] 접수완료');
+  v_body := coalesce(v_body, '작품 접수가 완료되었습니다.');
+  v_body := replace(v_body, '{선생님}', '');
+  v_body := replace(v_body, '{이름}',   coalesce(NEW.name,''));
+  v_body := replace(v_body, '{학교}',   coalesce(NEW.school,''));
+  v_body := replace(v_body, '{학년}',   coalesce(NEW.grade,''));
+  v_body := replace(v_body, '{부문}',   coalesce(NEW.category,''));
+  v_body := replace(v_body, '{접수키}', coalesce(NEW.submit_key,''));
+  v_body := replace(v_body, '{최종접수}', v_when);
+  v_body := replace(v_body, '{상태}', case when v_new then '접수 완료' else '접수 갱신' end);
+  v_body := replace(v_body, '{작품링크}', '<a href="'||coalesce(NEW.board_link,'')||'">'||coalesce(NEW.board_link,'')||'</a>');
+  v_subj := replace(replace(v_subj,'{이름}',coalesce(NEW.name,'')),'{부문}',coalesce(NEW.category,''));
   v_html := '<div style="font-family:sans-serif;font-size:15px;line-height:1.7;color:#222">'
-    || '<p>' || case when v_new then '작품 접수가 <b>완료</b>되었습니다. 🎉'
-                     else '기존 접수가 <b>최신 작품으로 갱신</b>되었습니다.' end || '</p>'
-    || '<table style="border-collapse:collapse">'
-    || '<tr><td style="padding:3px 12px;color:#888">학생</td><td style="padding:3px 12px"><b>'||coalesce(NEW.name,'')||'</b></td></tr>'
-    || '<tr><td style="padding:3px 12px;color:#888">학교·학년</td><td style="padding:3px 12px">'||coalesce(NEW.school,'')||' · '||coalesce(NEW.grade,'')||'</td></tr>'
-    || '<tr><td style="padding:3px 12px;color:#888">부문</td><td style="padding:3px 12px"><b>'||coalesce(NEW.category,'')||'</b></td></tr>'
-    || '<tr><td style="padding:3px 12px;color:#888">접수 키</td><td style="padding:3px 12px"><b>'||coalesce(NEW.submit_key,'')||'</b></td></tr>'
-    || '<tr><td style="padding:3px 12px;color:#888">작품 링크</td><td style="padding:3px 12px"><a href="'||coalesce(NEW.board_link,'')||'">'||coalesce(NEW.board_link,'')||'</a></td></tr>'
-    || '<tr><td style="padding:3px 12px;color:#888">접수 시각</td><td style="padding:3px 12px">'||v_when||'</td></tr>'
-    || '</table>'
-    || '<p style="color:#888;font-size:13px;margin-top:14px">· 지도교사 이메일로 자동 발송된 접수 확인 메일입니다.<br>'
-    || '· 접수 확인·수정 시 위 <b>접수 키</b>가 필요하니 보관해 주세요.<br>· 문의: support@tooning.io</p></div>';
+         || replace(v_body, E'\n', '<br>') || '</div>';
   begin
     perform net.http_post(
       url := 'https://api.resend.com/emails',
