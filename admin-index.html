@@ -175,7 +175,11 @@
 
     <!-- 상세 뷰 -->
     <div id="detailView" style="display:none;padding-bottom:50px">
-      <button class="btn" id="backBtn" style="margin:16px 0 10px">← 목록으로</button>
+      <div style="display:flex;align-items:center;gap:8px;margin:16px 0 10px">
+        <button class="btn" id="backBtn">← 목록으로</button>
+        <span style="flex:1"></span>
+        <button class="btn" id="delBtn" style="color:var(--warn);border-color:#F3C6C8">🗑 이 접수 삭제</button>
+      </div>
       <div id="detailCard"></div>
     </div>
   </div>
@@ -254,6 +258,18 @@ document.querySelectorAll('#viewToggle .seg-btn').forEach(function(b){
   b.addEventListener('click',function(){var v=b.getAttribute('data-view');showView(v);if(v==='map')renderMap();else renderList();});
 });
 document.getElementById('backBtn').addEventListener('click',function(){showView('list');renderList();});
+var DETAIL_ID=null;
+document.getElementById('delBtn').addEventListener('click',function(){deleteOne(DETAIL_ID)});
+function deleteOne(id){
+  var r=DATA.find(function(x){return String(x.id)===String(id)}); if(!r)return;
+  if(!confirm('「'+r.name+' · '+r.school+'」 접수를 삭제할까요?\n삭제하면 되돌릴 수 없습니다.'))return;
+  sb.rpc('충남콘테스트_관리자삭제',{p_pw:PW,p_id:id}).then(function(res){
+    if(res.error){alert('삭제 실패: '+(res.error.message||res.error));return;}
+    DATA=DATA.filter(function(x){return String(x.id)!==String(id)});
+    document.getElementById('cnt').textContent=DATA.length;
+    showView('list'); renderList(); renderMap();
+  });
+}
 
 /* ── 렌더(전체) ── */
 function render(){ refreshKeyChip(); document.getElementById('cnt').textContent=DATA.length; renderList(); renderMap(); }
@@ -297,6 +313,7 @@ function renderList(){
 /* ── 상세 뷰 ── */
 function showDetail(id){
   var r=DATA.find(function(x){return String(x.id)===String(id)}); if(!r)return;
+  DETAIL_ID=r.id;
   document.getElementById('detailCard').innerHTML=cardHTML(r);
   var b=document.getElementById('judge_'+r.id); if(b)b.addEventListener('click',function(){judgeOne(r.id)});
   showView('detail');

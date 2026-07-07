@@ -195,6 +195,22 @@ end;
 $$;
 grant execute on function public."충남콘테스트_관리자심사저장"(text,uuid,jsonb) to anon;
 
+-- 6-3) 접수 삭제 (관리자 전용)
+create or replace function public."충남콘테스트_관리자삭제"(p_pw text, p_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_pw is distinct from '5972' then
+    raise exception 'unauthorized';
+  end if;
+  delete from public."충남콘테스트_접수" where id = p_id;
+end;
+$$;
+grant execute on function public."충남콘테스트_관리자삭제"(text,uuid) to anon;
+
 -- ============================================================
 --  동작 확인용:
 --  select public."충남콘테스트_제출"('홍길동','OO고','고 2학년','t@s.kr','me@tooning.io','웹툰','https://tooning.io/board/x',true,'{"type":"webtoon","pdf_url":"https://..."}'::jsonb);
