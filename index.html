@@ -877,7 +877,7 @@ document.getElementById('submitBtn').addEventListener('click',function(){
       html+='<div class="key-box">'+key+'</div>'+
         '<div class="key-actions"><button type="button" id="keySave">🖼️ 키 이미지 저장</button>'+
         '<button type="button" id="keyShare">📤 키 이미지 공유</button></div>'+
-        '<div class="key-warn">※ 키를 잃어버려도 본인의 투닝 계정으로 조회할 수 있어요(우측 하단 챗봇).</div>';
+        '<div class="key-warn">※ 이 접수 키를 꼭 보관하세요. 접수 확인·수정 시 필요하며, 분실 시 support@tooning.io로 본인 확인 후 문의해 주세요.</div>';
     }
     okMsg.innerHTML=html;okMsg.style.display='block';
     okMsg.scrollIntoView({behavior:'smooth',block:'center'});
@@ -1005,7 +1005,7 @@ function botSay(t){
 }
 
 var KB=[
-  {k:['접수 확인','접수확인','내역 확인','신청 확인','접수 내역','접수내역','정상 접수','접수됐','접수 됐','제출 확인','확인하고'],a:'신청작 확인을 도와드릴게요. <b>접수 키(CNAI-…)</b> 또는 <b>본인의 투닝 계정(이메일/ID)</b>을 입력해 주시면, 접수 내역(이름·학교·부문·작품 링크)을 확인해 드립니다. 😊<br>잘못 제출하셨다면 올바른 작품으로 <b>다시 제출</b>하신 뒤 같은 계정을 알려주세요.'},
+  {k:['접수 확인','접수확인','내역 확인','신청 확인','접수 내역','접수내역','정상 접수','접수됐','접수 됐','제출 확인','확인하고','조회'],a:'접수 확인은 발급받은 <b>접수 키(CNAI-…)</b>로만 가능해요. 🔒<br>제출 완료 시 받으신 <b>CNAI-XXXX-XXXX</b> 형식의 키를 입력해 주세요.<br>(개인정보 보호를 위해 <b>계정만으로는 조회되지 않습니다.</b> 키를 잃어버렸다면 <a href="mailto:support@tooning.io">support@tooning.io</a>로 본인 확인 후 문의해 주세요.)'},
   {k:['로그인이 안','로그인 안','로그인이안','로그인','접속이 안','접속 안','접속안','로그인 문제'],a:'로그인이 안 되시는 경우, 먼저 <b>사용 중인 투닝 계정(이메일 또는 ID)</b>을 알려주세요.<br>그리고 해당 계정 정보를 담아 <a href="mailto:support@tooning.io">support@tooning.io</a>로 메일을 보내주시면, 확인 후 빠르게 도와드리겠습니다.'},
   {k:['마음대로','내맘대로','맘대로','아무 주제','아무거나','자유 주제','자유롭게','원하는 주제','원하는주제','하고 싶은','하고싶은','내가 원하는','직접 정','내가 정'],a:'작품 주제는 자유롭게 정할 수 없습니다. <b>공모전 공통 주제</b>에 맞게 제작해야 합니다.<br>· <b>웹툰</b>: AI에게 우리나라 전통문화를 소개하기<br>· <b>웹소설</b>: AI와 함께 상상하는 미래의 학교 풍경'},
   {k:['주제','무슨 주제','어떤 주제','주제 공개','주제 언제','뭐 만들','무슨 내용'],a:'작품 주제가 공개되었어요! 아래 주제에 맞춰 제작해 주세요.<br>· <b>웹툰</b>: AI에게 우리나라 전통문화를 소개하기<br>· <b>웹소설</b>: AI와 함께 상상하는 미래의 학교 풍경'},
@@ -1027,34 +1027,28 @@ function answer(q){
   if(best)return best.a;
   return '정확한 답변을 찾지 못했어요. 자세한 문의는 <a href="mailto:support@tooning.io">support@tooning.io</a> 또는 050-7458-2020으로 연락 주세요. 😊';
 }
-/* 메시지에서 투닝 계정(이메일/ID) 후보 추출 */
-function extractAccount(q){
-  var m=q.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
-  if(m) return m[0];
-  // 이메일이 아니면, 한글/공백을 제외한 영문ID 토큰(4자↑)을 후보로
-  var toks=q.split(/\s+/);
-  for(var i=0;i<toks.length;i++){
-    var t=toks[i].replace(/[^A-Za-z0-9._%+@-]/g,'');
-    if(t.length>=4 && /[A-Za-z0-9]/.test(t) && !/[가-힣]/.test(toks[i])) return t;
-  }
-  return null;
+/* 메시지에서 접수 키(CNAI-XXXX-XXXX) 추출 — 개인정보 보호: 계정만으론 조회 불가, 키로만 확인 */
+function extractKey(q){
+  var m=(q||'').toUpperCase().replace(/\s+/g,'').match(/CNAI-?[A-Z0-9]{4}-?[A-Z0-9]{4}/);
+  if(!m) return null;
+  var s=m[0].replace(/[^A-Z0-9]/g,'');           // CNAIXXXXXXXX
+  return 'CNAI-'+s.slice(4,8)+'-'+s.slice(8,12);
 }
-/* Supabase 접수내역 조회 */
-function lookupAccount(acct){
+/* Supabase 접수내역 조회 (접수 키 전용) */
+function lookupByKey(key){
   if(!sb){botSay('지금 조회 서버에 연결할 수 없어요. 잠시 후 다시 시도해 주세요. 🙏');return;}
   var dots=document.createElement('div');dots.className='typing';
   dots.innerHTML='<span></span><span></span><span></span>';
   body.appendChild(dots);body.scrollTop=body.scrollHeight;
-  sb.rpc(RPC_LOOKUP,{p_account:acct}).then(function(res){
+  sb.rpc(RPC_LOOKUP,{p_account:key}).then(function(res){
     body.removeChild(dots);
     if(res.error){append('조회 중 오류가 발생했어요. <a href="mailto:support@tooning.io">support@tooning.io</a>로 문의해 주세요.','bot');return;}
     var r=res.data&&res.data[0];
     if(!r){
-      append('「'+acct+'」 계정으로 <b>접수된 내역을 찾지 못했어요.</b> 😢<br>계정을 다시 확인하시거나, 아직 접수 전이라면 위 접수 폼에서 제출해 주세요.','bot');
+      append('입력하신 <b>접수 키('+key+')</b>로 접수 내역을 찾지 못했어요. 😢<br>키(CNAI-XXXX-XXXX)를 다시 확인해 주세요. 분실 시 <a href="mailto:support@tooning.io">support@tooning.io</a>로 본인 확인 후 문의해 주세요.','bot');
     }else{
       var when=new Date(r.updated_at||r.created_at).toLocaleString('ko-KR');
-      var keyLine=r.submit_key?'<br>· 접수 키: <b>'+r.submit_key+'</b>':'';
-      append('✅ <b>접수 내역을 확인했어요!</b><br>· 이름: '+r.name+'<br>· 학교: '+r.school+' ('+r.grade+')<br>· 부문: <b>'+r.category+'</b>'+keyLine+'<br>· 작품 링크: <a href="'+r.board_link+'" target="_blank">바로가기</a><br>· 최종 접수: '+when+'<br><br>수정이 필요하면 같은 계정으로 위 접수 폼에서 다시 제출하시면 됩니다. 😊','bot');
+      append('✅ <b>접수 내역을 확인했어요!</b><br>· 이름: '+r.name+'<br>· 학교: '+r.school+' ('+r.grade+')<br>· 부문: <b>'+r.category+'</b><br>· 접수 키: <b>'+r.submit_key+'</b><br>· 작품 링크: <a href="'+r.board_link+'" target="_blank">바로가기</a><br>· 최종 접수: '+when+'<br><br>수정이 필요하면 같은 계정으로 위 접수 폼에서 다시 제출하시면 됩니다. 😊','bot');
     }
   }).catch(function(){
     if(dots.parentNode)body.removeChild(dots);
@@ -1063,9 +1057,9 @@ function lookupAccount(acct){
 }
 function ask(q){
   append(q,'user');
-  var acct=extractAccount(q);
-  if(acct) lookupAccount(acct);
-  else botSay(answer(q));
+  var key=extractKey(q);
+  if(key){ lookupByKey(key); return; }
+  botSay(answer(q));
 }
 
 /* ── 숨겨진 관리자 진입: '공동참여 툰스퀘어' 5회 클릭 ── */

@@ -116,7 +116,9 @@ $$;
 grant execute on function
   public."충남콘테스트_제출"(text,text,text,text,text,text,text,boolean,jsonb) to anon;
 
--- 4) 조회 함수 (본인 계정 또는 접수 키로 1건) -------------------
+-- 4) 조회 함수 (접수 키 전용) -------------------------------------
+--    ⚠️ 개인정보 보호: 투닝 계정은 규칙적이라 열거(enumeration) 가능하므로
+--       계정으로는 조회하지 않고, 제출 시 발급되는 무작위 '접수 키'로만 1건 반환.
 drop function if exists public."충남콘테스트_조회"(text);
 create or replace function public."충남콘테스트_조회"(p_account text)
 returns table (
@@ -136,8 +138,7 @@ set search_path = public
 as $$
   select s.name, s.school, s.grade, s.category, s.board_link, s.submit_key, s.extra, s.created_at, s.updated_at
   from public."충남콘테스트_접수" s
-  where s.tooning_account = lower(trim(p_account))
-     or upper(s.submit_key) = upper(trim(p_account))
+  where upper(s.submit_key) = upper(trim(p_account))   -- 접수 키로만 조회(계정 열거 차단)
   limit 1;
 $$;
 
