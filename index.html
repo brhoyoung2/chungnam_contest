@@ -208,6 +208,13 @@
   .acct-result.warn{display:block;background:#FFF7E8;border:1px solid #FBE1A6;color:#8A5A00}
   .acct-result.bad{display:block;background:#FDECEC;border:1px solid #F3C6C8;color:#C2334B}
   .acct-result .fixbtn{margin-left:6px;font-weight:800;text-decoration:underline;cursor:pointer;color:inherit;background:none;border:none;font-size:13px;font-family:inherit}
+  /* 토스트 */
+  #toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);
+    background:#1E1622;color:#fff;padding:14px 22px;border-radius:13px;font-size:14.5px;font-weight:700;
+    box-shadow:0 16px 40px -12px rgba(0,0,0,.55);z-index:300;opacity:0;pointer-events:none;
+    transition:opacity .25s,transform .25s;max-width:92vw;text-align:center;line-height:1.5}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast.warn{background:var(--pink-dark)}
   .seg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .seg label{cursor:pointer;margin:0}
   .seg input{display:none}
@@ -837,6 +844,16 @@ function keyImage(key,mode){
   },'image/png');
 }
 
+/* ── 토스트 ── */
+var _toastTimer;
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}
+  t.textContent=msg; t.className=(type||'')+' show';
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(function(){t.className=(type||'')},3200);
+}
+
 /* ── 접수 폼 (제출 스피너 포함) ── */
 document.getElementById('submitBtn').addEventListener('click',function(){
   var name=document.getElementById('f_name').value.trim();
@@ -849,6 +866,17 @@ document.getElementById('submitBtn').addEventListener('click',function(){
 
   if(!name||!school||!grade||!email||!account){alert('이름·학교·학년·지도교사 이메일·투닝 계정을 모두 입력해 주세요.');return;}
   if(!cat){alert('참가 부문(웹툰/웹소설)을 선택해 주세요.');return;}
+
+  /* 투닝 계정 확인 게이트: 미확인이면 자동 검증 후, 유효하지 않으면 토스트 안내 */
+  var _ac=document.getElementById('acctCheck');
+  if(_ac && !_ac.classList.contains('ok')){
+    _ac.click();  /* 동기 검증 실행 → 결과 표시(초록/빨강) */
+    if(!_ac.classList.contains('ok')){
+      showToast('발급받은 투닝 계정을 「계정 확인」으로 다시 확인해 주세요. (명단과 대조됩니다)','warn');
+      document.getElementById('f_account').scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
+  }
 
   var category=cat.value;
   var link, pdfFile, aiImgs=[], desc='', ai='', episodes=[];
