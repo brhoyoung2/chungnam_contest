@@ -514,7 +514,6 @@
       <div class="hof-cta">
         <button class="btn btn-primary" id="hofBtn">🏆 지난 수상작 보기</button>
         <a class="btn btn-ghost" href="https://tooning-contest.vercel.app/" target="_blank" rel="noopener">🌏 국제 투닝 공모전 바로가기 →</a>
-        <button class="btn btn-ghost" id="dlBtn">📄 대회 안내문 다운로드</button>
       </div>
     </div>
   </div>
@@ -1238,16 +1237,6 @@ guideModal.addEventListener('click',function(e){if(e.target===guideModal)guideMo
 document.addEventListener('keydown',function(e){if(e.key==='Escape')guideModal.classList.remove('open')});
 
 /* ── 대회 안내문 다운로드 ── */
-document.getElementById('dlBtn').addEventListener('click',function(){
-  /* 안내문 PDF가 준비되면 아래 경로에 파일을 두고 링크가 자동 동작합니다. */
-  var FILE='assets/대회안내문.pdf';
-  fetch(FILE,{method:'HEAD'}).then(function(r){
-    if(r.ok){var a=document.createElement('a');a.href=FILE;a.download='';document.body.appendChild(a);a.click();a.remove();}
-    else throw 0;
-  }).catch(function(){
-    alert('대회 안내문은 준비되는 대로 업로드될 예정입니다.\n급하신 경우 support@tooning.io로 문의해 주세요.');
-  });
-});
 </script>
 </body>
 </html>
