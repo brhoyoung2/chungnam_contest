@@ -121,6 +121,14 @@
   .rchip b{color:inherit;margin-left:2px}
   .rp-head{font-weight:800;font-size:15px;margin:6px 2px 4px}
   .rl-head{font-weight:800;font-size:14.5px;margin:16px 2px 10px}.rl-head b{color:var(--pink)}
+  /* TABLE */
+  .tbl-wrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:12px;max-height:72vh;box-shadow:0 6px 18px -16px rgba(0,0,0,.25)}
+  table.tbl{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+  table.tbl th,table.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left}
+  table.tbl th{background:#FAF9FB;font-weight:800;position:sticky;top:0;z-index:1}
+  table.tbl tbody tr{cursor:pointer}
+  table.tbl tbody tr:hover td{background:#FFF6FA}
+  table.tbl a{color:var(--pink);font-weight:700}
 </style>
 </head>
 <body>
@@ -156,12 +164,23 @@
 
     <div class="seg-toggle" id="viewToggle">
       <button class="seg-btn on" data-view="list">📋 접수자 리스트</button>
+      <button class="seg-btn" data-view="table">📊 표 보기</button>
       <button class="seg-btn" data-view="map">🗺️ 지역 지도</button>
     </div>
 
     <!-- 리스트 뷰 -->
     <div id="listView">
       <div id="list" style="padding-bottom:50px"></div>
+    </div>
+
+    <!-- 표 뷰 -->
+    <div id="tableView" style="display:none;padding-bottom:50px">
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-p" id="csvBtn">⬇ CSV 다운로드 (엑셀)</button>
+        <button class="btn" id="gsheetBtn">📊 구글 시트로 열기</button>
+        <span class="muted">행을 클릭하면 상세로 이동합니다</span>
+      </div>
+      <div class="tbl-wrap" id="tableBox"></div>
     </div>
 
     <!-- 지역 지도 뷰 -->
@@ -245,6 +264,7 @@ document.getElementById('search').addEventListener('input',function(){showView('
 /* ── 뷰 전환 ── */
 function showView(v){
   document.getElementById('listView').style.display = v==='list'?'block':'none';
+  document.getElementById('tableView').style.display = v==='table'?'block':'none';
   document.getElementById('mapView').style.display  = v==='map'?'block':'none';
   document.getElementById('detailView').style.display = v==='detail'?'block':'none';
   document.getElementById('viewToggle').style.display = v==='detail'?'none':'flex';
@@ -255,7 +275,57 @@ function showView(v){
   window.scrollTo(0,0);
 }
 document.querySelectorAll('#viewToggle .seg-btn').forEach(function(b){
-  b.addEventListener('click',function(){var v=b.getAttribute('data-view');showView(v);if(v==='map')renderMap();else renderList();});
+  b.addEventListener('click',function(){var v=b.getAttribute('data-view');showView(v);if(v==='map')renderMap();else if(v==='table')renderTable();else renderList();});
+});
+
+/* ── 표 뷰 · CSV/구글시트 ── */
+var COLS=[
+  {t:'이름'},{t:'부문'},{t:'학교'},{t:'학년'},{t:'투닝계정'},{t:'지도교사'},
+  {t:'접수일'},{t:'AI총점'},{t:'추천'},{t:'접수키'},{t:'작품링크',link:true}
+];
+function rowVals(r){
+  var e=r.extra||{}, rv=e.ai_review, keys=['주제적합성','창의성','완성도','표현력'];
+  var total=rv?keys.reduce(function(a,k){return a+(Number(rv[k])||0)},0)+'/40':'미심사';
+  var rec=rv?((rv['추천']===true||rv['추천']==='추천')?'추천':((rv['추천']===false||rv['추천']==='비추천')?'비추천':'')):'';
+  var when=new Date(r.updated_at||r.created_at).toLocaleString('ko-KR');
+  return [r.name,r.category,r.school,r.grade,r.tooning_account,r.teacher_email,when,total,rec,r.submit_key||'',r.board_link||''];
+}
+function renderTable(){
+  var rows=filteredRows();
+  var head='<tr>'+COLS.map(function(c){return '<th>'+c.t+'</th>'}).join('')+'</tr>';
+  var body=rows.map(function(r){
+    var v=rowVals(r);
+    var tds=v.map(function(x,i){
+      if(COLS[i].link) return '<td>'+(x?'<a href="'+esc(x)+'" target="_blank" onclick="event.stopPropagation()">보기</a>':'-')+'</td>';
+      return '<td>'+esc(x)+'</td>';
+    }).join('');
+    return '<tr data-id="'+esc(r.id)+'">'+tds+'</tr>';
+  }).join('');
+  document.getElementById('tableBox').innerHTML='<table class="tbl"><thead>'+head+'</thead><tbody>'+
+    (body||'<tr><td colspan="'+COLS.length+'" class="muted" style="padding:16px">표시할 접수가 없습니다.</td></tr>')+'</tbody></table>';
+  document.querySelectorAll('#tableBox tr[data-id]').forEach(function(tr){
+    tr.addEventListener('click',function(){showDetail(tr.getAttribute('data-id'))});
+  });
+}
+function tableText(sep){
+  var rows=filteredRows();
+  function cell(x){x=(x==null?'':String(x)); if(sep===',' && /[",\n]/.test(x)) return '"'+x.replace(/"/g,'""')+'"'; return x;}
+  var lines=[COLS.map(function(c){return c.t}).join(sep)];
+  rows.forEach(function(r){lines.push(rowVals(r).map(cell).join(sep))});
+  return lines.join('\n');
+}
+document.getElementById('csvBtn').addEventListener('click',function(){
+  var blob=new Blob(['﻿'+tableText(',')],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='충남콘테스트_접수_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();setTimeout(function(){a.remove();URL.revokeObjectURL(a.href)},500);
+});
+document.getElementById('gsheetBtn').addEventListener('click',function(){
+  var tsv=tableText('\t');
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(tsv):Promise.reject()).then(function(){
+    alert('접수 데이터를 복사했어요. 📋\n새로 열리는 구글 시트의 A1 셀을 클릭하고 Ctrl+V(붙여넣기) 하세요.');
+    window.open('https://sheets.new','_blank');
+  }).catch(function(){alert('클립보드 복사가 차단됐어요. 대신 CSV 다운로드를 이용해 주세요.')});
 });
 document.getElementById('backBtn').addEventListener('click',function(){showView('list');renderList();});
 var DETAIL_ID=null;
