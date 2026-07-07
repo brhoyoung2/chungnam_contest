@@ -212,6 +212,71 @@ end;
 $$;
 grant execute on function public."충남콘테스트_관리자삭제"(text,uuid) to anon;
 
+-- 7) 접수 완료 자동메일 (Resend) --------------------------------
+--    첫 접수(INSERT)·재제출(UPDATE·updated_at 변경 시)에 지도교사 메일로 발송, leo@tooning.io 참조.
+--    ⚠️ 아래 v_key 를 실제 Resend API 키(re_...)로 교체하세요. (공개 레포엔 키를 넣지 마세요)
+--    ⚠️ api.resend.com 은 Cloudflare 뒤라 User-Agent 헤더가 없으면 차단(1010)됨 → 헤더 포함.
+create extension if not exists pg_net with schema extensions;
+
+create or replace function public."충남_접수완료메일"()
+returns trigger language plpgsql security definer set search_path = public, extensions as $$
+declare
+  v_key  text := 're_REPLACE_WITH_RESEND_KEY';   -- ← 실제 키로 교체
+  v_new  boolean := (TG_OP = 'INSERT');
+  v_when text := to_char(NEW.updated_at at time zone 'Asia/Seoul','YYYY-MM-DD HH24:MI');
+  v_subj text;
+  v_html text;
+begin
+  if NEW.teacher_email is null or position('@' in NEW.teacher_email) = 0 then
+    return NEW;
+  end if;
+  v_subj := '[충남 AI 공모전] '
+         || case when v_new then '접수 완료 안내 — ' else '접수 내역 갱신 — ' end
+         || coalesce(NEW.name,'') || ' (' || coalesce(NEW.category,'') || ')';
+  v_html := '<div style="font-family:sans-serif;font-size:15px;line-height:1.7;color:#222">'
+    || '<p>' || case when v_new then '작품 접수가 <b>완료</b>되었습니다. 🎉'
+                     else '기존 접수가 <b>최신 작품으로 갱신</b>되었습니다.' end || '</p>'
+    || '<table style="border-collapse:collapse">'
+    || '<tr><td style="padding:3px 12px;color:#888">학생</td><td style="padding:3px 12px"><b>'||coalesce(NEW.name,'')||'</b></td></tr>'
+    || '<tr><td style="padding:3px 12px;color:#888">학교·학년</td><td style="padding:3px 12px">'||coalesce(NEW.school,'')||' · '||coalesce(NEW.grade,'')||'</td></tr>'
+    || '<tr><td style="padding:3px 12px;color:#888">부문</td><td style="padding:3px 12px"><b>'||coalesce(NEW.category,'')||'</b></td></tr>'
+    || '<tr><td style="padding:3px 12px;color:#888">접수 키</td><td style="padding:3px 12px"><b>'||coalesce(NEW.submit_key,'')||'</b></td></tr>'
+    || '<tr><td style="padding:3px 12px;color:#888">작품 링크</td><td style="padding:3px 12px"><a href="'||coalesce(NEW.board_link,'')||'">'||coalesce(NEW.board_link,'')||'</a></td></tr>'
+    || '<tr><td style="padding:3px 12px;color:#888">접수 시각</td><td style="padding:3px 12px">'||v_when||'</td></tr>'
+    || '</table>'
+    || '<p style="color:#888;font-size:13px;margin-top:14px">· 지도교사 이메일로 자동 발송된 접수 확인 메일입니다.<br>'
+    || '· 접수 확인·수정 시 위 <b>접수 키</b>가 필요하니 보관해 주세요.<br>· 문의: support@tooning.io</p></div>';
+  begin
+    perform net.http_post(
+      url := 'https://api.resend.com/emails',
+      headers := jsonb_build_object(
+        'Authorization', 'Bearer '||v_key,
+        'Content-Type', 'application/json',
+        'User-Agent', 'tooning-contest/1.0 (+https://c-contest.tooning.io)'
+      ),
+      body := jsonb_build_object(
+        'from', '충남 AI 공모전 접수 <noreply@tooning.io>',
+        'to',   jsonb_build_array(NEW.teacher_email),
+        'cc',   jsonb_build_array('leo@tooning.io'),
+        'reply_to', 'leo@tooning.io',
+        'subject', v_subj,
+        'html', v_html
+      )
+    );
+  exception when others then null;   -- 메일 실패해도 접수는 정상 저장
+  end;
+  return NEW;
+end $$;
+
+drop trigger if exists trg_충남_접수메일_ins on public."충남콘테스트_접수";
+create trigger trg_충남_접수메일_ins after insert on public."충남콘테스트_접수"
+  for each row execute function public."충남_접수완료메일"();
+
+drop trigger if exists trg_충남_접수메일_upd on public."충남콘테스트_접수";
+create trigger trg_충남_접수메일_upd after update on public."충남콘테스트_접수"
+  for each row when (NEW.updated_at is distinct from OLD.updated_at)
+  execute function public."충남_접수완료메일"();
+
 -- ============================================================
 --  동작 확인용:
 --  select public."충남콘테스트_제출"('홍길동','OO고','고 2학년','t@s.kr','me@tooning.io','웹툰','https://tooning.io/board/x',true,'{"type":"webtoon","pdf_url":"https://..."}'::jsonb);
