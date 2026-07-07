@@ -908,7 +908,7 @@ document.getElementById('submitBtn').addEventListener('click',function(){
     if(msg.indexOf('category_locked')>-1){
       var prevCat=(msg.split('category_locked:')[1]||'').trim();
       busy(false);
-      alert('이미 「'+prevCat+'」 부문으로 접수하셨습니다.\n1인 1작품이며 부문 변경은 불가합니다. 같은 부문으로만 재제출할 수 있어요.');
+      alert('이 투닝 계정('+account+')은 이미 「'+prevCat+'」 부문으로 접수되어 있습니다.\n\n· 1인 1작품이라 부문 변경(웹툰↔웹소설)은 불가하며, 같은 「'+prevCat+'」 부문으로만 재제출(작품 교체)이 됩니다.\n· 브라우저·시크릿창·IP·구글 로그인과는 무관하며, 오직 입력한 투닝 계정 기준으로 확인합니다.\n· 다른 학생 접수라면 위 입력칸의 투닝 계정이 본인 계정인지 확인해 주세요.');
     }else if(msg.indexOf('invalid_link')>-1){
       fail('투닝 보드 링크(tooning.io)를 정확히 입력해 주세요.');
     }else if(/bucket|storage|not found|object/i.test(msg)){
