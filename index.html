@@ -194,6 +194,17 @@
     width:100%;justify-content:center;font-family:inherit;transition:.15s}
   .add-ep:hover{border-color:var(--pink);background:var(--pink-soft)}
   .hint{font-size:12px;color:var(--ink-soft);margin-top:6px}
+  /* 계정 확인 */
+  .acct-row{display:flex;gap:8px;align-items:stretch}
+  .acct-row input{flex:1}
+  .acct-check{white-space:nowrap;padding:0 20px;border-radius:12px;border:1.5px solid var(--pink);
+    background:var(--pink-soft);color:var(--pink-dark);font-weight:800;font-size:14px;font-family:inherit;cursor:pointer;transition:.15s}
+  .acct-check:hover{background:var(--pink);color:#fff}
+  .acct-result{display:none;font-size:13.5px;font-weight:600;margin-top:9px;padding:11px 13px;border-radius:11px;line-height:1.55;white-space:pre-line}
+  .acct-result.ok{display:block;background:#EAF8F1;border:1px solid #BBE8D2;color:#0F7A50}
+  .acct-result.warn{display:block;background:#FFF7E8;border:1px solid #FBE1A6;color:#8A5A00}
+  .acct-result.bad{display:block;background:#FDECEC;border:1px solid #F3C6C8;color:#C2334B}
+  .acct-result .fixbtn{margin-left:6px;font-weight:800;text-decoration:underline;cursor:pointer;color:inherit;background:none;border:none;font-size:13px;font-family:inherit}
   .seg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .seg label{cursor:pointer;margin:0}
   .seg input{display:none}
@@ -561,9 +572,13 @@
         </div>
       </div>
       <div class="field">
-        <label>접수한 투닝 로그인 계정 <span class="req">*</span></label>
-        <input type="text" id="f_account" placeholder="작품을 만든 투닝 계정 (이메일 또는 ID)">
-        <p class="hint">동명이인 확인을 위해, 작품을 제작·제출한 <strong>본인의 투닝 로그인 계정</strong>을 정확히 입력해 주세요.</p>
+        <label>본 공모전을 위해 발급받은 투닝 계정 <span class="req">*</span></label>
+        <div class="acct-row">
+          <input type="text" id="f_account" placeholder="예: hackathon260001@tooning.io">
+          <button type="button" class="acct-check" id="acctCheck">계정 확인</button>
+        </div>
+        <div class="acct-result" id="acctResult"></div>
+        <p class="hint">대회용으로 <strong>발급받은 투닝 계정</strong>을 정확히 입력하고 「계정 확인」을 눌러 명단과 대조해 보세요.</p>
       </div>
       <div class="field">
         <label>참가 부문 <span class="req">*</span> <span class="hint" style="font-weight:500">— 1인 1작품, 중복·변경 시 탈락</span></label>
@@ -918,6 +933,52 @@ document.getElementById('submitBtn').addEventListener('click',function(){
     }
   });
 });
+
+/* ── 발급 계정 확인 (명단 대조 · 완전 클라이언트) ──
+   학생 계정: hackathon26 + 4자리(0001~1158) @tooning.io
+   교사 계정: hackathon_26 + 4자리 @tooning.io  (접수는 학생 계정으로) */
+(function(){
+  var input=document.getElementById('f_account');
+  var btn=document.getElementById('acctCheck');
+  var out=document.getElementById('acctResult');
+  if(!input||!btn||!out)return;
+  var STU_MAX=1158;
+  function show(level,msg,fix){
+    out.className='acct-result '+level;
+    out.textContent=msg;
+    if(fix){
+      var b=document.createElement('button');b.type='button';b.className='fixbtn';b.textContent='이 계정으로 채우기';
+      b.addEventListener('click',function(){input.value=fix;check();input.focus();});
+      out.appendChild(document.createTextNode(' '));out.appendChild(b);
+    }
+  }
+  function suggestFix(s){
+    var m=s.match(/(\d{3,6})/); if(!m)return null;
+    var d=m[1], suf=(d.length>=5?d.slice(-4):('0000'+d).slice(-4));
+    var n=parseInt(suf,10); if(!(n>=1&&n<=STU_MAX))return null;
+    return 'hackathon26'+('0000'+n).slice(-4)+'@tooning.io';
+  }
+  function check(){
+    var a=(input.value||'').trim().toLowerCase().replace(/\s+/g,'');
+    if(!a){show('warn','계정을 입력한 뒤 「계정 확인」을 눌러 주세요.');return;}
+    var mS=a.match(/^hackathon26(\d{4})@tooning\.io$/);
+    if(mS){
+      var n=parseInt(mS[1],10);
+      if(n>=1&&n<=STU_MAX) show('ok','✓ 발급 명단에서 확인됐어요. 이 계정으로 접수하시면 됩니다.');
+      else show('bad','✗ 발급 명단에 없는 번호예요.\n학생 계정 번호는 hackathon260001 ~ hackathon26'+('0000'+STU_MAX).slice(-4)+' 범위입니다. 계정 번호를 다시 확인해 주세요.');
+      return;
+    }
+    if(/^hackathon_26\d{4}@tooning\.io$/.test(a)){
+      show('warn','⚠️ 지도교사 계정으로 보여요. 접수는 학생 본인 계정(hackathon26xxxx@tooning.io)으로 진행해 주세요.');return;
+    }
+    var fix=suggestFix(a);
+    if(fix){show('warn','⚠️ 오타로 보여요. 혹시 이 계정 아닌가요? → '+fix,fix);return;}
+    show('bad','✗ 대회용으로 발급받은 계정 형식이 아니에요.\n예시: hackathon260001@tooning.io — 발급받은 계정을 정확히 입력해 주세요.');
+  }
+  btn.addEventListener('click',check);
+  input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();check();}});
+  input.addEventListener('input',function(){out.style.display='none';out.className='acct-result';});
+})();
 
 /* ── 챗봇 ── */
 var panel=document.getElementById('chatPanel');
