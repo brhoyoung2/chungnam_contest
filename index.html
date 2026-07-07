@@ -200,6 +200,9 @@
   .acct-check{white-space:nowrap;padding:0 20px;border-radius:12px;border:1.5px solid var(--pink);
     background:var(--pink-soft);color:var(--pink-dark);font-weight:800;font-size:14px;font-family:inherit;cursor:pointer;transition:.15s}
   .acct-check:hover{background:var(--pink);color:#fff}
+  .acct-check.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+  .acct-check.ok:hover{background:#128a5b}
+  .acct-row input.ok{border-color:var(--ok);box-shadow:0 0 0 4px rgba(22,160,106,.14)}
   .acct-result{display:none;font-size:13.5px;font-weight:600;margin-top:9px;padding:11px 13px;border-radius:11px;line-height:1.55;white-space:pre-line}
   .acct-result.ok{display:block;background:#EAF8F1;border:1px solid #BBE8D2;color:#0F7A50}
   .acct-result.warn{display:block;background:#FFF7E8;border:1px solid #FBE1A6;color:#8A5A00}
@@ -951,6 +954,10 @@ document.getElementById('submitBtn').addEventListener('click',function(){
       b.addEventListener('click',function(){input.value=fix;check();input.focus();});
       out.appendChild(document.createTextNode(' '));out.appendChild(b);
     }
+    var ok=(level==='ok');
+    btn.classList.toggle('ok',ok);
+    btn.textContent=ok?'✓ 확인됨':'계정 확인';
+    input.classList.toggle('ok',ok);
   }
   function suggestFix(s){
     var m=s.match(/(\d{3,6})/); if(!m)return null;
@@ -964,7 +971,7 @@ document.getElementById('submitBtn').addEventListener('click',function(){
     var mS=a.match(/^hackathon26(\d{4})@tooning\.io$/);
     if(mS){
       var n=parseInt(mS[1],10);
-      if(n>=1&&n<=STU_MAX) show('ok','✓ 발급 명단에서 확인됐어요. 이 계정으로 접수하시면 됩니다.');
+      if(n>=1&&n<=STU_MAX) show('ok','✅ 확인되었습니다! 발급 명단에 있는 계정이에요. 이 계정으로 접수하시면 됩니다.');
       else show('bad','✗ 발급 명단에 없는 번호예요.\n학생 계정 번호는 hackathon260001 ~ hackathon26'+('0000'+STU_MAX).slice(-4)+' 범위입니다. 계정 번호를 다시 확인해 주세요.');
       return;
     }
@@ -977,7 +984,8 @@ document.getElementById('submitBtn').addEventListener('click',function(){
   }
   btn.addEventListener('click',check);
   input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();check();}});
-  input.addEventListener('input',function(){out.style.display='none';out.className='acct-result';});
+  input.addEventListener('input',function(){out.style.display='none';out.className='acct-result';
+    btn.classList.remove('ok');btn.textContent='계정 확인';input.classList.remove('ok');});
 })();
 
 /* ── 챗봇 ── */
