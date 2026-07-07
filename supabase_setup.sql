@@ -229,7 +229,7 @@ create table if not exists public."충남콘테스트_설정" (
 alter table public."충남콘테스트_설정" enable row level security;   -- anon 직접 접근 차단(관리자 RPC로만)
 insert into public."충남콘테스트_설정"(id, mail_subject, mail_body) values (1,
   '[AI 도구 활용 디지털 콘텐츠 창작] 접수완료',
-  E'안녕하세요, 선생님.\n제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2 공모전 접수를 안내드립니다.\n아래와 같이 작품이 정상적으로 접수되었습니다.\n\n• 이름: {이름}\n• 학교: {학교} ({학년})\n• 부문: {부문}\n• 접수 키: {접수키}\n• 작품 링크: {작품링크}\n• 최종 접수: {최종접수}\n\n투닝 공모전을 사랑해 주셔서 감사드립니다.\n오늘도 즐거운 하루 보내세요! 😊'
+  E'안녕하세요, 선생님.\n제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2 공모전 접수를 안내드립니다.\n아래와 같이 작품이 정상적으로 접수되었습니다.\n\n• 이름: {이름}\n• 학교: {학교} ({학년})\n• 부문: {부문}\n• 접수 키: {접수키}\n• 작품 링크: {작품링크}\n• 최종 접수: {최종접수}\n\n제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 주제 2에 참여해주셔서 감사드립니다.\n궁금한 사항이나 문의가 있을 경우, support@tooning.io 로 문의 부탁드립니다.'
 ) on conflict (id) do nothing;
 
 -- 7-2) 관리자 양식 조회/저장 (비밀번호 게이트)
@@ -290,10 +290,10 @@ begin
         'User-Agent', 'tooning-contest/1.0 (+https://c-contest.tooning.io)'
       ),
       body := jsonb_build_object(
-        'from', '충남 AI 공모전 접수 <noreply@tooning.io>',
+        'from', '제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 주제 2 접수 <support@tooning.io>',
         'to',   jsonb_build_array(NEW.teacher_email),
         'cc',   jsonb_build_array('leo@tooning.io'),
-        'reply_to', 'leo@tooning.io',
+        'reply_to', 'support@tooning.io',
         'subject', v_subj,
         'html', v_html
       )
