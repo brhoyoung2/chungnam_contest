@@ -292,7 +292,7 @@ begin
       body := jsonb_build_object(
         'from', '제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 주제 2 접수 <support@tooning.io>',
         'to',   jsonb_build_array(NEW.teacher_email),
-        'cc',   jsonb_build_array('leo@tooning.io'),
+        'cc',   jsonb_build_array('leo@tooning.io', 'support@tooning.io'),
         'reply_to', 'support@tooning.io',
         'subject', v_subj,
         'html', v_html
