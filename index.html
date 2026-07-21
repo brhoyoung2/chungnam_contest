@@ -210,6 +210,8 @@
   .acct-check:hover{background:var(--pink);color:#fff}
   .acct-check.ok{background:var(--ok);border-color:var(--ok);color:#fff}
   .acct-check.ok:hover{background:#128a5b}
+  .acct-check.bad{background:#C2334B;border-color:#C2334B;color:#fff}
+  .acct-check.bad:hover{background:#a72840}
   .acct-row input.ok{border-color:var(--ok);box-shadow:0 0 0 4px rgba(22,160,106,.14)}
   .acct-result{display:none;font-size:13.5px;font-weight:600;margin-top:9px;padding:11px 13px;border-radius:11px;line-height:1.55;white-space:pre-line}
   .acct-result.ok{display:block;background:#EAF8F1;border:1px solid #BBE8D2;color:#0F7A50}
@@ -1064,19 +1066,27 @@ document.getElementById('submitBtn').addEventListener('click',function(){
   var btn=document.getElementById('emailCheck');
   var out=document.getElementById('emailResult');
   if(!input||!btn||!out)return;
-  function show(level,msg,fix){
+  /* 투닝 지급(발급) 지도교사 계정: hackathon_260701 ~ 260826 @tooning.io (260746 미발급 제외) */
+  function isAssignedTeacherEmail(v){
+    var m=/^hackathon_(\d{6})@tooning\.io$/.exec(v);
+    if(!m)return false;
+    var n=parseInt(m[1],10);
+    return n>=260701 && n<=260826 && n!==260746;
+  }
+  function show(level,msg){
     out.className='acct-result '+level; out.textContent=msg;
-    if(fix){
-      var b=document.createElement('button');b.type='button';b.className='fixbtn';b.textContent='이 이메일로 채우기';
-      b.addEventListener('click',function(){input.value=fix;check();input.focus();});
-      out.appendChild(document.createTextNode(' '));out.appendChild(b);
-    }
-    var ok=(level==='ok');
-    btn.classList.toggle('ok',ok); btn.textContent=ok?'✓ 확인됨':'확인'; input.classList.toggle('ok',ok);
+    var ok=(level==='ok'), bad=(level==='bad');
+    btn.classList.toggle('ok',ok); btn.classList.toggle('bad',bad);
+    btn.textContent=ok?'✓ 확인됨':(bad?'✗ 확인 필요':'확인'); input.classList.toggle('ok',ok);
+  }
+  function fail(){ /* 명단·지급 이메일과 불일치 → X 버튼 + 토스트 안내 */
+    show('bad','✗ 이메일을 확인해 주세요. 명단·지급 이메일과 일치하지 않습니다. (그대로 접수는 가능합니다)');
+    showToast('지도교사 이메일을 확인해 주세요.','warn');
   }
   function check(){
     var v=(input.value||'').trim().toLowerCase();
     if(!v){show('warn','지도교사 이메일을 입력한 뒤 「확인」을 눌러 주세요.');return;}
+    if(isAssignedTeacherEmail(v)){show('ok','✅ 확인되었습니다! 지급된 지도교사 계정이에요.');return;}
     if(!sb){show('warn','확인 서버에 연결할 수 없어요. 그대로 접수하셔도 됩니다.');return;}
     btn.disabled=true; btn.textContent='확인 중…';
     sb.rpc('충남콘테스트_교사확인',{p_email:v}).then(function(res){
@@ -1084,13 +1094,12 @@ document.getElementById('submitBtn').addEventListener('click',function(){
       if(res.error){show('warn','확인 중 오류가 발생했어요. 그대로 접수하셔도 됩니다.');return;}
       var r=(res.data&&res.data[0])||{status:'none'};
       if(r.status==='ok') show('ok','✅ 확인되었습니다! 명단의 지도교사 이메일이에요.');
-      else if(r.status==='typo') show('warn','⚠️ 오타로 보여요. 혹시 이 이메일 아닌가요? → '+r.suggestion, r.suggestion);
-      else show('bad','✗ 명단에서 찾지 못했어요. 지도교사 이메일 철자를 다시 확인해 주세요. (그대로 접수는 가능합니다)');
+      else fail();   /* 오타·미등록 모두 X + 토스트 안내 */
     }).catch(function(){btn.disabled=false;show('warn','확인 중 오류가 발생했어요. 그대로 접수하셔도 됩니다.');});
   }
   btn.addEventListener('click',check);
   input.addEventListener('input',function(){out.style.display='none';out.className='acct-result';
-    btn.classList.remove('ok');btn.textContent='확인';input.classList.remove('ok');window._teacherNudged=false;});
+    btn.classList.remove('ok');btn.classList.remove('bad');btn.textContent='확인';input.classList.remove('ok');window._teacherNudged=false;});
 })();
 
 /* ── 챗봇 ── */
