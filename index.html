@@ -103,9 +103,10 @@
   .dday.d-end .d-num{color:var(--ink)}
   @keyframes ddayPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.85)}}
   @media(max-width:520px){
-    .dday{font-size:13px;padding:9px 16px;gap:8px}
-    .dday .d-num{font-size:17px}
-    .dday .d-sub{display:none}
+    .dday{font-size:12.5px;padding:9px 15px;gap:7px;flex-wrap:wrap;justify-content:center;
+      max-width:calc(100% - 32px);line-height:1.5}
+    .dday .d-num{font-size:16px}
+    .dday .d-sub{font-size:12px}
   }
   .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
   .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:15px;padding:13px 26px;
@@ -465,16 +466,16 @@
     if(now>END){
       cls+=' d-end';
       html='<span class="d-dot"></span><span class="d-num">접수 마감</span>'+
-           '<span class="d-sub">· 8. 17 17:00 종료</span>';
+           '<span class="d-sub">· 8.17.(월) 17:00 종료</span>';
     }else if(now<OPEN){
       var dO=(kstDay(OPEN)-kstDay(now))/86400000;
       html='<span class="d-dot"></span>접수 시작까지 <span class="d-num">D-'+dO+'</span>'+
-           '<span class="d-sub">· 7. 2 09:00 시작</span>';
+           '<span class="d-sub">· 7.2.(목) 09:00 시작</span>';
     }else{
       var d=(kstDay(END)-kstDay(now))/86400000;
       html='<span class="d-dot"></span>'+(d>0
-        ? '접수 마감까지 <span class="d-num">D-'+d+'</span><span class="d-sub">· 8. 17 17:00 마감</span>'
-        : '<span class="d-num">오늘 마감!</span><span class="d-sub">· 17:00까지 접수</span>');
+        ? '접수 마감까지 <span class="d-num">D-'+d+'</span><span class="d-sub">· 8.17.(월) 17:00 마감</span>'
+        : '<span class="d-num">오늘 마감!</span><span class="d-sub">· 8.17.(월) 17:00까지 접수</span>');
     }
     el.className=cls; el.innerHTML=html;
   }
