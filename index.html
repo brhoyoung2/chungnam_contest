@@ -88,7 +88,25 @@
   .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(22,160,106,.18)}
   h1{font-size:clamp(34px,6vw,58px);line-height:1.16;letter-spacing:-.035em;margin:26px 0 18px;font-weight:800}
   h1 .hl{color:var(--pink)}
-  .sub{font-size:clamp(16px,2.6vw,20px);color:var(--ink-soft);max-width:600px;margin:0 auto 36px}
+  .sub{font-size:clamp(16px,2.6vw,20px);color:var(--ink-soft);max-width:600px;margin:0 auto 22px}
+  /* D-Day 배지 */
+  .dday{display:none;align-items:center;gap:10px;margin:0 auto 26px;padding:10px 20px;border-radius:999px;
+    background:var(--white);border:1.5px solid var(--pink-line);box-shadow:var(--shadow);
+    font-weight:700;font-size:14.5px;color:var(--ink-soft)}
+  .dday.on{display:inline-flex}
+  .dday .d-dot{width:8px;height:8px;border-radius:50%;background:var(--pink);
+    box-shadow:0 0 0 4px rgba(240,45,110,.16);animation:ddayPulse 1.7s ease-in-out infinite;flex:none}
+  .dday .d-num{color:var(--pink);font-weight:800;font-size:19px;letter-spacing:-.02em}
+  .dday .d-sub{color:var(--ink-soft);font-weight:600;opacity:.8}
+  .dday.d-end{border-color:#E7E2E4;color:var(--ink-soft)}
+  .dday.d-end .d-dot{background:#B9B2B6;box-shadow:0 0 0 4px rgba(0,0,0,.06);animation:none}
+  .dday.d-end .d-num{color:var(--ink)}
+  @keyframes ddayPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.85)}}
+  @media(max-width:520px){
+    .dday{font-size:13px;padding:9px 16px;gap:8px}
+    .dday .d-num{font-size:17px}
+    .dday .d-sub{display:none}
+  }
   .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
   .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:15px;padding:13px 26px;
     border-radius:999px;text-decoration:none;cursor:pointer;border:none;transition:.18s;font-family:inherit}
@@ -421,6 +439,7 @@
     <div><span class="hero-orgs"><img class="org-cne" src="image/logo-cne.png" alt="충청남도교육청"><span class="org-x">×</span><img class="org-tn" src="image/logo-tooning.png" alt="투닝"></span></div>
     <h1>2026 제5회 인공지능 로봇 끝장 개발(해커톤) 한마당<br><span class="hl">주제 2</span> AI 도구 활용 디지털 콘텐츠 창작</h1>
     <p class="sub">AI 도구 <strong>투닝</strong>으로 웹툰·웹소설을 만들어 출품하는 비대면 온라인 공모전</p>
+    <div><span class="dday" id="dday"></span></div>
     <div class="hero-btns">
       <a href="#apply" class="btn btn-primary">작품 접수하기</a>
       <a href="#guide" class="btn btn-ghost">참가 안내 보기</a>
@@ -432,6 +451,36 @@
     </div>
   </div>
 </section>
+<script>
+/* ── 히어로 D-Day (한국시간 기준) ── */
+(function(){
+  var el=document.getElementById('dday'); if(!el)return;
+  var OPEN=Date.UTC(2026,6,2,0,0,0);    /* 7/2 09:00 KST */
+  var END =Date.UTC(2026,7,17,8,0,0);   /* 8/17 17:00 KST */
+  /* 해당 시각의 '한국 날짜 자정'을 UTC ms 로 환산 */
+  function kstDay(ms){var d=new Date(ms+9*3600000);
+    return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());}
+  function render(){
+    var now=Date.now(), cls='dday on', html;
+    if(now>END){
+      cls+=' d-end';
+      html='<span class="d-dot"></span><span class="d-num">접수 마감</span>'+
+           '<span class="d-sub">· 8. 17 17:00 종료</span>';
+    }else if(now<OPEN){
+      var dO=(kstDay(OPEN)-kstDay(now))/86400000;
+      html='<span class="d-dot"></span>접수 시작까지 <span class="d-num">D-'+dO+'</span>'+
+           '<span class="d-sub">· 7. 2 09:00 시작</span>';
+    }else{
+      var d=(kstDay(END)-kstDay(now))/86400000;
+      html='<span class="d-dot"></span>'+(d>0
+        ? '접수 마감까지 <span class="d-num">D-'+d+'</span><span class="d-sub">· 8. 17 17:00 마감</span>'
+        : '<span class="d-num">오늘 마감!</span><span class="d-sub">· 17:00까지 접수</span>');
+    }
+    el.className=cls; el.innerHTML=html;
+  }
+  render(); setInterval(render,60000);   /* 자정 넘어가도 자동 갱신 */
+})();
+</script>
 
 <!-- PHOTO MARQUEE (지난 대회 현장) -->
 <section class="band-photos">
