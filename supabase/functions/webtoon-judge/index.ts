@@ -30,7 +30,9 @@ const json = (body: unknown, status = 200) =>
     headers: { ...cors, "Content-Type": "application/json" },
   });
 
-const MODEL = "gpt-4o";
+const DEFAULT_MODEL = "gpt-4o";
+// 관리자 드롭다운에서 고를 수 있는 허용 모델(비전+PDF 지원)
+const ALLOWED_MODELS = ["gpt-4o", "gpt-4o-mini", "gpt-4.1", "gpt-4.1-mini"];
 
 const SYS = [
   "너는 충청남도교육청 청소년(초·중·고) 디지털 콘텐츠 창작 공모전의 '웹툰' 부문 심사위원이다.",
@@ -94,10 +96,11 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
   try {
-    const { pw, id } = await req.json().catch(() => ({}));
+    const { pw, id, model } = await req.json().catch(() => ({}));
     const ADMIN_PW = Deno.env.get("ADMIN_PW") || "5972";
     if (pw !== ADMIN_PW) return json({ error: "unauthorized" }, 401);
     if (!id) return json({ error: "id 누락" }, 400);
+    const MODEL = ALLOWED_MODELS.includes(model) ? model : DEFAULT_MODEL;
 
     const OPENAI_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_KEY) return json({ error: "OPENAI_API_KEY 시크릿 미설정" }, 500);

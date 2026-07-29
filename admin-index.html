@@ -37,6 +37,10 @@
   .bar .count{font-weight:800;font-size:15px}.bar .count b{color:var(--pink)}
   .bar .sp{flex:1}
   .bar input.search{width:230px;font-size:14px;padding:9px 12px}
+  .modelsel{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--ink,#333)}
+  .modelsel select{font-family:inherit;font-size:13px;font-weight:600;padding:8px 10px;border-radius:9px;
+    border:1.5px solid var(--line,#e6e1e5);background:#fff;cursor:pointer}
+  .modelsel select:focus{outline:none;border-color:var(--pink)}
   .keychip{font-size:12px;font-weight:700;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#fff}
   .keychip.on{color:var(--ok);border-color:#BBE8D2;background:#EAF8F1}
   .keychip.off{color:var(--warn);border-color:#F3C6C8;background:#FDECEC}
@@ -170,6 +174,14 @@
       <div class="count">접수 <b id="cnt">0</b>건</div>
       <input class="search" id="search" placeholder="이름·학교·계정·부문 검색">
       <div class="sp"></div>
+      <label class="modelsel" title="웹툰 심사에 사용할 OpenAI 모델">🖼️ 웹툰 모델
+        <select id="webtoonModel">
+          <option value="gpt-4o">gpt-4o (정밀·약 35~55원/건)</option>
+          <option value="gpt-4o-mini">gpt-4o-mini (저가·약 2~3원/건)</option>
+          <option value="gpt-4.1">gpt-4.1 (고성능)</option>
+          <option value="gpt-4.1-mini">gpt-4.1-mini (저가·균형)</option>
+        </select>
+      </label>
       <button class="btn btn-p" id="judgeAll">⚡ 미심사 전체 AI 심사</button>
       <button class="btn" id="reload">↻ 새로고침</button>
     </div>
@@ -586,15 +598,24 @@ function buildPrompt(r){
   if(body.length>9000)body=body.slice(0,9000)+'\n…(이하 생략)';
   return body;
 }
-/* 웹툰: 서버 Edge Function(OpenAI gpt-4o 비전)으로 PDF 직접 심사 */
+/* 웹툰: 서버 Edge Function(OpenAI 비전)으로 PDF 직접 심사 */
 var JUDGE_FN_URL=SUPABASE_URL+'/functions/v1/webtoon-judge';
+/* 웹툰 심사 모델 선택(드롭다운) — localStorage 저장 */
+var webtoonModelSel=document.getElementById('webtoonModel');
+if(webtoonModelSel){
+  var savedM=localStorage.getItem('webtoon_model');
+  if(savedM)webtoonModelSel.value=savedM;
+  webtoonModelSel.addEventListener('change',function(){localStorage.setItem('webtoon_model',webtoonModelSel.value);});
+}
+function webtoonModel(){return (webtoonModelSel&&webtoonModelSel.value)||localStorage.getItem('webtoon_model')||'gpt-4o';}
 function judgeWebtoon(id,done){
   var r=DATA.find(function(x){return x.id===id}); if(!r){if(done)done();return;}
   var wrap=document.getElementById('jwrap_'+id);
-  if(wrap)wrap.innerHTML='<div class="jhead"><span class="lab">AI 심사</span><span class="sp"></span><span class="spin"></span> <span class="muted" style="margin-left:6px">PDF 분석 중… (수십 초 소요)</span></div>';
+  var mdl=webtoonModel();
+  if(wrap)wrap.innerHTML='<div class="jhead"><span class="lab">AI 심사</span><span class="sp"></span><span class="spin"></span> <span class="muted" style="margin-left:6px">PDF 분석 중… ('+esc(mdl)+' · 수십 초 소요)</span></div>';
   fetch(JUDGE_FN_URL,{method:'POST',
     headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
-    body:JSON.stringify({pw:PW,id:id})})
+    body:JSON.stringify({pw:PW,id:id,model:mdl})})
   .then(function(res){return res.json()})
   .then(function(d){
     if(!d.ok||d.error)throw new Error(d.error||'심사 실패');
