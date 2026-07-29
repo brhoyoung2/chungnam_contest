@@ -70,6 +70,14 @@
   .verdict{font-size:13px;margin-top:6px;background:#FAF9FB;border:1px solid var(--line);border-radius:9px;padding:9px 11px}
   .rec{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;margin-left:6px}
   .rec.y{background:#EAF8F1;color:var(--ok)}.rec.n{background:#FDECEC;color:var(--warn)}
+  .vwrap{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+  .vblock{display:flex;flex-direction:column;gap:4px}
+  .vline{font-size:12.5px;line-height:1.5;background:#FAF9FB;border:1px solid var(--line);border-radius:9px;padding:8px 11px}
+  .vline b{color:#5B2BD6;margin-right:5px}
+  .cuts{font-size:12.5px}
+  .cuts summary{cursor:pointer;font-weight:700;color:#5B2BD6;padding:6px 0}
+  .cuts ol{margin:4px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+  .cuts li{line-height:1.5}.cuts li b{color:#7A3BFF;margin-right:4px}
   .spin{width:15px;height:15px;border:2px solid var(--pink-line);border-top-color:var(--pink);border-radius:50%;animation:s .7s linear infinite;display:inline-block}
   @keyframes s{to{transform:rotate(360deg)}}
   .muted{color:var(--ink-soft);font-size:12.5px}
@@ -541,10 +549,24 @@ function reviewHTML(r){
   var sc=keys.map(function(k){return '<span class="sc">'+k+' <b>'+(rv[k]==null?'-':rv[k])+'</b></span>'}).join('');
   var total=keys.reduce(function(a,k){return a+(Number(rv[k])||0)},0);
   var rec=(rv['추천']===true||rv['추천']==='추천')?'<span class="rec y">추천</span>':(rv['추천']===false||rv['추천']==='비추천'?'<span class="rec n">비추천</span>':'');
+  /* 웹툰 비전 심사 추가 정보(있을 때만) */
+  var extra='';
+  var pl=[['페이지구성평','페이지 구성'],['레이아웃평','레이아웃'],['스토리흐름평','스토리 흐름']]
+    .filter(function(p){return rv[p[0]]}).map(function(p){return '<div class="vline"><b>'+p[1]+'</b> '+esc(rv[p[0]])+'</div>'}).join('');
+  if(pl)extra+='<div class="vblock">'+pl+'</div>';
+  if(rv['근거'])extra+='<div class="vline"><b>채점 근거</b> '+esc(rv['근거'])+'</div>';
+  if(Array.isArray(rv['컷분석'])&&rv['컷분석'].length){
+    var cuts=rv['컷분석'].map(function(c){
+      var head=(c['페이지']!=null?('p'+c['페이지']):'')+(c['컷']!=null?('·컷'+c['컷']):'');
+      return '<li><b>'+esc(head)+'</b> '+esc(c['내용']||'')+(c['연출']?' <span class="muted">('+esc(c['연출'])+')</span>':'')+'</li>';
+    }).join('');
+    extra+='<details class="cuts"><summary>컷 분석 '+rv['컷분석'].length+'컷 보기</summary><ol>'+cuts+'</ol></details>';
+  }
   return '<div class="jhead"><span class="lab">AI 심사 결과</span><span class="sp"></span>'+
       '<span class="total">총점 <span class="v">'+total+'</span>/40</span>'+rec+'</div>'+
     '<div class="score">'+sc+'</div>'+
     '<div class="verdict">'+esc(rv['총평']||'')+'</div>'+
+    (extra?'<div class="vwrap">'+extra+'</div>':'')+
     '<div class="jhead" style="margin-top:8px"><span class="muted">'+esc(rv['_model']||'')+' · '+esc(rv['_at']||'')+'</span><span class="sp"></span>'+btn+'</div>';
 }
 
@@ -564,10 +586,34 @@ function buildPrompt(r){
   if(body.length>9000)body=body.slice(0,9000)+'\n…(이하 생략)';
   return body;
 }
+/* 웹툰: 서버 Edge Function(OpenAI gpt-4o 비전)으로 PDF 직접 심사 */
+var JUDGE_FN_URL=SUPABASE_URL+'/functions/v1/webtoon-judge';
+function judgeWebtoon(id,done){
+  var r=DATA.find(function(x){return x.id===id}); if(!r){if(done)done();return;}
+  var wrap=document.getElementById('jwrap_'+id);
+  if(wrap)wrap.innerHTML='<div class="jhead"><span class="lab">AI 심사</span><span class="sp"></span><span class="spin"></span> <span class="muted" style="margin-left:6px">PDF 분석 중… (수십 초 소요)</span></div>';
+  fetch(JUDGE_FN_URL,{method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+    body:JSON.stringify({pw:PW,id:id})})
+  .then(function(res){return res.json()})
+  .then(function(d){
+    if(!d.ok||d.error)throw new Error(d.error||'심사 실패');
+    r.extra=r.extra||{}; r.extra.ai_review=d.review;   /* 서버가 이미 DB 저장함 */
+    if(wrap){wrap.innerHTML=reviewHTML(r);var b=document.getElementById('judge_'+id);if(b)b.addEventListener('click',function(){judgeOne(id)});}
+    if(done)done();
+  })
+  .catch(function(err){
+    if(wrap){wrap.innerHTML='<div class="jhead"><span class="lab">AI 심사</span></div><div class="muted" style="color:var(--warn)">심사 실패: '+esc((err&&err.message)||err)+'</div>'+
+      '<button class="btn btn-p" id="judge_'+id+'" style="margin-top:8px;padding:7px 12px">🤖 다시 시도</button>';
+      var b=document.getElementById('judge_'+id); if(b)b.addEventListener('click',function(){judgeOne(id)});}
+    if(done)done();
+  });
+}
 function judgeOne(id){
-  var key=xkey();
-  if(!key){alert('먼저 우측 상단 「AI 키 설정」에서 xAI(Grok) API 키를 입력해 주세요.');return;}
   var r=DATA.find(function(x){return x.id===id}); if(!r)return;
+  if(r.category==='웹툰'){judgeWebtoon(id);return;}   /* 웹툰은 서버 비전 심사 */
+  var key=xkey();
+  if(!key){alert('웹소설 심사에는 우측 상단 「AI 키 설정」에서 xAI(Grok) API 키가 필요합니다.');return;}
   var wrap=document.getElementById('jwrap_'+id);
   wrap.innerHTML='<div class="jhead"><span class="lab">AI 심사</span><span class="sp"></span><span class="spin"></span> <span class="muted" style="margin-left:6px">심사 중…</span></div>';
   var sys='너는 충청남도교육청 청소년(초·중·고) 디지털 콘텐츠 창작 공모전(웹툰/웹소설)의 공정하고 엄격한 심사위원이다. '+
@@ -600,16 +646,17 @@ function judgeOne(id){
 }
 /* 전체(미심사) 순차 심사 */
 document.getElementById('judgeAll').addEventListener('click',function(){
-  if(!xkey()){alert('먼저 「AI 키 설정」에서 xAI(Grok) API 키를 입력해 주세요.');return;}
   var pending=DATA.filter(function(r){return !(r.extra&&r.extra.ai_review)});
   if(!pending.length){alert('미심사 접수가 없습니다.');return;}
-  if(!confirm('미심사 '+pending.length+'건을 순차로 AI 심사합니다. 진행할까요?'))return;
+  var needKey=pending.some(function(r){return r.category!=='웹툰'});   /* 웹소설이 있으면 Grok 키 필요 */
+  if(needKey&&!xkey()){alert('웹소설 심사에는 「AI 키 설정」에서 xAI(Grok) API 키가 필요합니다. (웹툰은 서버에서 심사)');return;}
+  if(!confirm('미심사 '+pending.length+'건을 순차로 AI 심사합니다. (웹툰은 PDF 비전 심사로 건당 수십 초) 진행할까요?'))return;
   var i=0;
   (function next(){
     if(i>=pending.length){render();alert('전체 심사 완료');return;}
-    var id=pending[i++].id;
-    // judgeOne 은 비동기 → 완료 후 다음으로
-    judgeSeq(id,next);
+    var r=pending[i++];
+    if(r.category==='웹툰'){judgeWebtoon(r.id,function(){setTimeout(next,400)});return;}   /* 웹툰=서버 비전 */
+    judgeSeq(r.id,next);
   })();
 });
 function judgeSeq(id,done){
