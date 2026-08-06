@@ -16,7 +16,6 @@
 //   또는 대시보드에서 새 함수로 이 파일 내용을 붙여넣고 Deploy.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -136,7 +135,22 @@ Deno.serve(async (req) => {
       if (!r.ok) return json({ error: "PDF 다운로드 실패: " + r.status }, 502);
       bytes = new Uint8Array(await r.arrayBuffer());
     }
-    const b64 = encodeBase64(bytes);
+
+    // 2-1) OpenAI Files API 로 PDF 업로드(스트리밍) → file_id
+    //   base64 인라인 대신 파일 업로드로 대용량 PDF 메모리 초과(546) 방지
+    const form = new FormData();
+    form.append("purpose", "user_data");
+    form.append("file", new Blob([bytes], { type: "application/pdf" }), "webtoon.pdf");
+    const up = await fetch("https://api.openai.com/v1/files", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + OPENAI_KEY },
+      body: form,
+    });
+    const upData = await up.json();
+    if (!up.ok || !upData?.id) {
+      return json({ error: "OpenAI 파일 업로드 실패: " + (upData?.error?.message || up.status) }, 502);
+    }
+    const fileId = upData.id as string;
 
     // 3) 메타 + 사용자 지시 텍스트
     const meta = [
@@ -162,17 +176,18 @@ Deno.serve(async (req) => {
             role: "user",
             content: [
               { type: "input_text", text: meta },
-              {
-                type: "input_file",
-                filename: "webtoon.pdf",
-                file_data: "data:application/pdf;base64," + b64,
-              },
+              { type: "input_file", file_id: fileId },
             ],
           },
         ],
       }),
     });
     const oaData = await oa.json();
+    // 업로드 파일 정리(베스트 에포트)
+    fetch("https://api.openai.com/v1/files/" + fileId, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + OPENAI_KEY },
+    }).catch(() => {});
     if (!oa.ok) {
       return json({ error: "OpenAI 오류: " + (oaData?.error?.message || oa.status) }, 502);
     }
