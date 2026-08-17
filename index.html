@@ -416,9 +416,36 @@
     .strip>div{border-right:none;border-bottom:1px solid var(--pink-line)}
     .strip>div:last-child{border-bottom:none}
   }
+  /* ── 접수 마감 안내(닫기 불가 · 블랙딤 · 전체 차단) ── */
+  html.contest-closed, html.contest-closed body{overflow:hidden !important;height:100%;touch-action:none;overscroll-behavior:none}
+  #closedOverlay{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;
+    padding:24px;background:rgba(10,6,12,.82);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  #closedOverlay .closed-card{background:#fff;max-width:440px;width:100%;border-radius:22px;padding:38px 30px 30px;
+    text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.4);animation:closedPop .35s cubic-bezier(.2,.9,.3,1.2)}
+  #closedOverlay .closed-ico{font-size:46px;line-height:1;margin-bottom:14px}
+  #closedOverlay h2{font-size:25px;font-weight:800;letter-spacing:-.03em;margin:0 0 14px;color:#1c1420}
+  #closedOverlay p{font-size:15px;line-height:1.65;color:#5b5560;margin:0 0 10px}
+  #closedOverlay p b{color:#1c1420}
+  #closedOverlay .thx{font-size:15.5px;font-weight:700;color:var(--pink);margin-top:14px}
+  #closedOverlay .closed-sub{margin-top:20px;padding-top:16px;border-top:1px solid #eee;font-size:13.5px;color:#7a7580}
+  #closedOverlay .closed-sub b{color:var(--pink-dark)}
+  @keyframes closedPop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
+
+<script>document.documentElement.classList.add('contest-closed');</script>
+<!-- 접수 마감 안내(닫기 불가 · 전체 차단) -->
+<div id="closedOverlay" role="dialog" aria-modal="true" aria-label="접수 마감 안내">
+  <div class="closed-card">
+    <div class="closed-ico">🎉</div>
+    <h2>접수가 마감되었습니다</h2>
+    <p>제5회 인공지능 로봇 끝장 개발(해커톤) 한마당 · 주제2<br>
+       <b>AI 도구 활용 디지털 콘텐츠 창작</b> 접수가 종료되었습니다.</p>
+    <p class="thx">관심을 가져주셔서 진심으로 감사합니다.</p>
+    <div class="closed-sub">결과 발표 · <b>9. 5.(토) 15:00 온라인</b></div>
+  </div>
+</div>
 
 <!-- LOADER -->
 <div id="loader">
@@ -1358,7 +1385,20 @@ document.getElementById('guideClose').addEventListener('click',function(){guideM
 guideModal.addEventListener('click',function(e){if(e.target===guideModal)guideModal.classList.remove('open')});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')guideModal.classList.remove('open')});
 
-/* ── 대회 안내문 다운로드 ── */
+/* ── 접수 마감: 스크롤·확대·탭 이동 완전 차단(팝업 카드 내부는 허용) ── */
+(function(){
+  var ov=document.getElementById('closedOverlay'); if(!ov)return;
+  var card=ov.querySelector('.closed-card');
+  function inCard(t){return card&&card.contains(t);}
+  ['wheel','touchmove','scroll'].forEach(function(ev){
+    document.addEventListener(ev,function(e){ if(!inCard(e.target)){e.preventDefault();} },{passive:false,capture:true});
+  });
+  document.addEventListener('keydown',function(e){
+    var k=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','PageUp','PageDown','Home','End',' ','Spacebar','Tab'];
+    if(k.indexOf(e.key)>=0){e.preventDefault();}
+  },{capture:true});
+  window.scrollTo(0,0);
+})();
 </script>
 </body>
 </html>
