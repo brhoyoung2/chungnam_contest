@@ -1388,7 +1388,7 @@ document.getElementById('guideClose').addEventListener('click',function(){guideM
 guideModal.addEventListener('click',function(e){if(e.target===guideModal)guideModal.classList.remove('open')});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')guideModal.classList.remove('open')});
 
-/* ── 접수 마감 안내: 접수 버튼/제출 시도 시 팝업 표시(닫기 가능) ── */
+/* ── 접수 마감 안내: 접수 폼은 열람 허용, 제출 시도 시에만 팝업(닫기 가능) ── */
 (function(){
   var nt=document.getElementById('closedNotice'); if(!nt)return;
   function open(){nt.classList.add('open');}
@@ -1397,11 +1397,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')guideModal.c
   nt.querySelector('.closed-x').addEventListener('click',close);
   nt.addEventListener('click',function(e){if(e.target===nt)close();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
-  /* 접수 CTA(#apply 이동) 클릭 시: 이동 대신 마감 안내 */
-  document.querySelectorAll('a[href="#apply"]').forEach(function(a){
-    a.addEventListener('click',function(e){e.preventDefault();open();});
-  });
-  /* 제출 버튼: 캡처 단계에서 가로채 기존 제출 로직 차단 + 마감 안내 */
+  /* 접수 CTA(#apply)는 그대로 이동 허용 → 접수 폼을 볼 수 있음(참고용) */
+  /* 제출 버튼만 차단: 캡처 단계에서 가로채 기존 제출 로직 차단 + 마감 안내 */
   var sb=document.getElementById('submitBtn');
   if(sb){sb.addEventListener('click',function(e){
     e.preventDefault();e.stopImmediatePropagation();open();
