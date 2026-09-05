@@ -469,7 +469,6 @@
 </style>
 <div id="wm" role="dialog" aria-modal="true" aria-label="수상자 발표">
   <div class="wm-card">
-    <button type="button" class="wm-x" aria-label="닫기">&times;</button>
     <div class="wm-head">
       <div class="org">충청남도교육청 · 미래인재과 &nbsp;×&nbsp; 투닝</div>
       <h2>제5회 인공지능 로봇 끝장 개발(해커톤) 한마당<br>주제 2 · AI 도구 활용 디지털 콘텐츠 창작 수상자</h2>
@@ -490,10 +489,9 @@
 <script>
 (function(){
   var wm=document.getElementById('wm'); if(!wm)return;
-  function close(){wm.classList.remove('open')}
-  wm.querySelector('.wm-x').addEventListener('click',close);
-  wm.addEventListener('click',function(e){if(e.target===wm)close()});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
+  // 팝업만 보이게 — 닫기 없음(배경 클릭·ESC 로도 안 닫힘) + 배경 스크롤 잠금
+  document.documentElement.style.overflow='hidden';
+  document.body.style.overflow='hidden';
   wm.classList.add('open');
 })();
 </script>
